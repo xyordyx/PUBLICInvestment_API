@@ -42,7 +42,7 @@ public class MainController {
             sw.start("Method-2 Get Balance");
             if(transactions.getFinancialTransactions().size() != data.getFinancialIndex()){
                 data.setFinancialTransactions(transactions);
-                data = core.getBalance(data);
+                data = core.getBalance(Util.resetData(data));
             }
             sw.stop();
 

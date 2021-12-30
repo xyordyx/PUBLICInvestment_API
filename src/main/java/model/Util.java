@@ -1,5 +1,6 @@
 package model;
 
+import model.finsmartData.FinsmartData;
 import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
@@ -136,5 +137,19 @@ public class Util {
             index++;
         }
         return 66;
+    }
+
+    public static FinsmartData resetData(FinsmartData data){
+        data.setSolesTotalDeposited(0);
+        data.setDollarTotalDeposited(0);
+        data.setSolesRetentions(0);
+        data.setDollarRetentions(0);
+        data.setDollarTotalProfit(0);
+        data.setSolesTotalProfit(0);
+        data.setDollarCurrentInvested(0);
+        data.setSolesCurrentInvested(0);
+        data.setSolesAmountAvailable(0);
+        data.setDollarAmountAvailable(0);
+        return data;
     }
 }
