@@ -127,7 +127,6 @@ public class MainController {
     }
 
     @GetMapping("/getcurrentinvestments")
-    @ResponseBody
     public ResponseEntity<APIDebtorData> getCurrentInvestments() {
 
         StopWatch sw = new org.springframework.util.StopWatch();

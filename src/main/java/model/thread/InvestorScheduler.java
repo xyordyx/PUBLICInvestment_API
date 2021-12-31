@@ -64,7 +64,7 @@ public class InvestorScheduler implements Runnable{
             }else scheduleTime = "17:30";
             System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName() +" - scheduled - " + getTime());
             try {
-                TimeUnit.MILLISECONDS.sleep(timesDiff(scheduleTime)-200);
+                TimeUnit.MILLISECONDS.sleep(timesDiff(scheduleTime)-700);
                 //TimeUnit.MILLISECONDS.sleep(10000);
                 investmentData.setScheduled(false);
             } catch (InterruptedException e) {
