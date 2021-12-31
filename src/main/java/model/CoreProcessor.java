@@ -7,14 +7,19 @@ import model.json.Transactions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class CoreProcessor {
 
     public FinsmartData getExtraData(FinsmartData smartData, String token) {
         if(smartData.getInvoiceIndex() == null){
-            smartData.setInvoiceIndex(Util.indexInvoices(new CIG().getInvoices(token)));
+            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            if(temp != null){
+                smartData.setInvoiceIndex(Util.indexInvoices(temp));
+            }else return null;
         }
+
         smartData.setSolesProfitExpected(0);
         smartData.setSolesOnRisk(0);
         smartData.setDollarProfitExpected(0);
@@ -132,9 +137,12 @@ public class CoreProcessor {
         return smartData;
     }
 
-    public ArrayList<InvoiceTransactions> getDebtorHistory(FinsmartData smartData, String debtor, String token) {
+    public APIDebtorData getDebtorHistory(FinsmartData smartData, String debtor, String token) {
         if(smartData.getInvoiceIndex() == null){
-            smartData.setInvoiceIndex(Util.indexInvoices(new CIG().getInvoices(token)));
+            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            if(temp != null){
+                smartData.setInvoiceIndex(Util.indexInvoices(temp));
+            }else return null;
         }
 
         ArrayList<InvoiceTransactions> invoices = smartData.getInvoiceIndex().getDebtorInvoiceIndex().get(debtor);
@@ -150,12 +158,15 @@ public class CoreProcessor {
                 temp.add(inv);
             }
         }
-        return temp;
+        return new APIDebtorData(temp,0);
     }
 
     public APIDebtorData getCurrentInvestments(FinsmartData smartData, String token) {
         if(smartData.getInvoiceIndex() == null){
-            smartData.setInvoiceIndex(Util.indexInvoices(new CIG().getInvoices(token)));
+            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            if(temp != null){
+                smartData.setInvoiceIndex(Util.indexInvoices(temp));
+            }else return null;
         }
 
         HashMap<String,InvoiceTransactions> invoiceMap = smartData.getInvoiceIndex().getInvoicesIndex();

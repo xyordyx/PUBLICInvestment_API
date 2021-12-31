@@ -8,13 +8,9 @@ import com.google.gson.reflect.TypeToken;
 import model.finsmartData.FinsmartUtil;
 import model.json.*;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -86,7 +82,7 @@ public class CIG {
     }
 
     public FinancialTransactions getFinancialTransactions(String token){
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpClient httpClient = HttpClientBuilder.create().build();
         String stringResponse;
         FinancialTransactions financialTransactions = null;
         HttpGet getRequest = new HttpGet(smartURLv1+financialTransactionsPath);
@@ -109,8 +105,30 @@ public class CIG {
         return financialTransactions;
     }
 
-    public List<InvoiceTransactions> getInvoices(String token){
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+    public static List<InvoiceTransactions> getInvoices(String token){
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        String stringResponse;
+        List<InvoiceTransactions> invoiceTransactions = new ArrayList<>();
+        HttpGet getRequest = new HttpGet(smartURLv1+invoices);
+
+        //Set the API media type in http accept header
+        getRequest.addHeader("Accept", "application/json");
+        getRequest.addHeader("Content-Type", "application/json");
+        getRequest.addHeader("Authorization", "Bearer "+token);
+
+        //Send the request
+        try {
+            HttpResponse response = httpClient.execute(getRequest);
+            ObjectMapper objectMapper = Util.initiatePrettyObjectMapper();
+            invoiceTransactions =  Util.customReadJavaType(response,objectMapper);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return invoiceTransactions;
+    }
+
+    public static List<InvoiceTransactions> getInvoices0(String token){
+        HttpClient httpClient = HttpClientBuilder.create().build();
         String stringResponse;
         List<InvoiceTransactions> invoiceTransactions = new ArrayList<>();
         HttpGet getRequest = new HttpGet(smartURLv1+invoices);
@@ -126,16 +144,16 @@ public class CIG {
             stringResponse = EntityUtils.toString(response.getEntity());
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
             InvoiceTransactions[] op = objectMapper.readValue(stringResponse, InvoiceTransactions[].class);
             invoiceTransactions = new ArrayList<>(Arrays.asList(op));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("INVOICES COUNT: "+invoiceTransactions.size());
         return invoiceTransactions;
     }
 
-    public LoginJSON getAuthentications(String email, String passd) {
+    /*public LoginJSON getAuthentications(String email, String passd) {
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse = null;
         try {
@@ -143,7 +161,6 @@ public class CIG {
             final String json = "{\"email\":\""+email+"\",\"actualPassword\":\""+passd+"\"}";
             StringEntity entity = new StringEntity(json);
             httpPost.setEntity(entity);
-            httpPost.setHeader("Accept", "application/json, text/plain, */*");
             httpPost.setHeader("Content-type", "application/json");
 
             CloseableHttpResponse response;
@@ -161,7 +178,7 @@ public class CIG {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 
     public static List<Opportunities> getOpportunitiesJSON(String token) {
         URL url;
