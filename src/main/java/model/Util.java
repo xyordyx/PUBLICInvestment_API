@@ -1,11 +1,25 @@
 package model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import model.finsmartData.FinsmartData;
 import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
 import model.json.Transactions;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
+import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonInputMessage;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
@@ -123,7 +137,7 @@ public class Util {
     public static Boolean isValidData(InvestmentData data){
         if(data != null){
             return data.getInvoiceId() != null && data.getCurrency() != null && data.getAmount() != null &&
-                    data.getDebtorName() != null;
+                    data.getDebtorName() != null && data.getToken() != null;
         }
         return false;
     }
@@ -151,5 +165,42 @@ public class Util {
         data.setSolesAmountAvailable(0);
         data.setDollarAmountAvailable(0);
         return data;
+    }
+
+    static ObjectMapper initiatePrettyObjectMapper() {
+        ObjectMapper customObjectMapper = new ObjectMapper();
+        customObjectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        customObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // additional indentation for arrays
+        DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
+        pp.indentArraysWith(new DefaultIndenter());
+        customObjectMapper.setDefaultPrettyPrinter(pp);
+
+        return customObjectMapper;
+    }
+
+    static List<InvoiceTransactions> customReadJavaType(HttpResponse inputMessage, ObjectMapper objectMapper) throws IOException {
+        try {
+            if (inputMessage instanceof MappingJackson2HttpMessageConverter) {
+                Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
+                if (deserializationView != null) {
+                    InvoiceTransactions[] op = objectMapper.readerWithView(deserializationView).forType(InvoiceTransactions[].class).
+                            readValue(EntityUtils.toString(inputMessage.getEntity()));
+                    return new ArrayList<>(Arrays.asList(op));
+                    //return objectMapper.readerWithView(deserializationView).forType(InvoiceTransactions[].class).readValue(EntityUtils.toString(inputMessage.getEntity()));
+                }
+            }
+            InvoiceTransactions[] op = objectMapper.readValue(EntityUtils.toString(inputMessage.getEntity()), InvoiceTransactions[].class);
+            return new ArrayList<>(Arrays.asList(op));
+            //return objectMapper.readValue(EntityUtils.toString(inputMessage.getEntity()), InvoiceTransactions[].class);
+        }
+        catch (InvalidDefinitionException ex) {
+            throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
+            //return "Type definition error";
+        }
+        catch (JsonProcessingException ex) {
+            throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
+            //return "JSON parse error";
+        }
     }
 }

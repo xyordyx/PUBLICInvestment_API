@@ -8,11 +8,20 @@ public class InvestmentData {
     private double adjustedAmount;
     private boolean autoAdjusted;
     private String debtorName;
+    private String token;
 
     private boolean isScheduled;
     private String message;
     private boolean status;
     private boolean completed;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public boolean isStatus() {
         return status;

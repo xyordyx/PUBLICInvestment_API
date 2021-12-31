@@ -2,7 +2,6 @@ package model.thread;
 
 import model.finsmartData.FinsmartUtil;
 import model.json.InvestmentData;
-import model.json.LoginJSON;
 import model.json.ResponseJSON;
 
 import java.util.Map;
@@ -16,17 +15,17 @@ public class InvestorScheduler implements Runnable{
     private final AtomicBoolean running = new AtomicBoolean(true);
     private ExecutorService poolSubmit = Executors.newFixedThreadPool(1);
     private InvestmentData investmentData;
-    private LoginJSON loginJSON;
+    private String token;
     private boolean flag;
     private Map<String, InvestorScheduler> invQueue;
 
     private static final String amountBigger = "INVESTMENTS.INVESTMENT_AMOUNT_IS_BIGGER_THAN_TARGET_INVOICE_AVAILABLE_BALANCE";
     private static final String notPublished = "INVESTMENTS.TARGET_INVOICE_NOT_PUBLISHED";
 
-    public InvestorScheduler(InvestmentData investmentData, LoginJSON loginJSON, Map<String, InvestorScheduler> invQueue) {
+    public InvestorScheduler(InvestmentData investmentData, String token, Map<String, InvestorScheduler> invQueue) {
         this.investmentData = investmentData;
         this.flag = true;
-        this.loginJSON = loginJSON;
+        this.token = token;
         this.invQueue = invQueue;
     }
 
@@ -73,7 +72,7 @@ public class InvestorScheduler implements Runnable{
                 //Thread.currentThread().interrupt();
             }
             if(flag){
-                responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(),investmentData,loginJSON);
+                responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(),investmentData,token);
                 actualAmount = investmentData.getAmount();
                 //INVOICE NOT PUBLISHED YET
                 while (responseJSON.getMessage().replace('"', ' ').equals(notPublished) &&
@@ -85,13 +84,13 @@ public class InvestorScheduler implements Runnable{
                                 investmentData.getInvoiceId() + " - interrupted");
                         Thread.currentThread().interrupt();
                     }*/
-                    responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(), investmentData, loginJSON);
+                    responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(), investmentData, token);
                 }
                 //INVOICE AMOUNT IS LESS THAN DESIRED AMOUNT
                 if (responseJSON.getMessage().replace('"', ' ').equals(amountBigger)
                         && !Thread.currentThread().isInterrupted()) {
-                    actualAmount = FinsmartUtil.updateOpportunity(loginJSON, investmentData.getInvoiceId());
-                    responseJSON = FinsmartUtil.postToFinSmart(actualAmount, investmentData, loginJSON);
+                    actualAmount = FinsmartUtil.updateOpportunity(token, investmentData.getInvoiceId());
+                    responseJSON = FinsmartUtil.postToFinSmart(actualAmount, investmentData, token);
                     FinsmartUtil.updateInvestment(investmentData, responseJSON, 4, actualAmount);
                 }
                 //INVESTMENT COMPLETED
