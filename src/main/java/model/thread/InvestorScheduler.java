@@ -56,11 +56,15 @@ public class InvestorScheduler implements Runnable{
         @Override
         public InvestmentData call()  {
             ResponseJSON responseJSON;
-            String scheduleTime;
+            String scheduleTime = null;
             double actualAmount;
             if(investmentData.getTime() == 0){
                 scheduleTime = "12:30";
-            }else scheduleTime = "17:30";
+            }else if(investmentData.getTime() == 1){
+                scheduleTime = "17:30";
+            }else if(investmentData.getTime() == 2){
+                scheduleTime = "0:00";
+            }
             System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName() +" - scheduled - " + getTime());
             try {
                 TimeUnit.MILLISECONDS.sleep(timesDiff(scheduleTime)-700);

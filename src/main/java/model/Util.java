@@ -96,7 +96,7 @@ public class Util {
     }
 
     public static long timesDiff(String time2){
-        if(time2 == null){
+        if(time2 == null || time2.equals("0:00")){
             return 0;
         }
         SimpleDateFormat format1 = new SimpleDateFormat("HH:mm:ss");
