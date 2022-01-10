@@ -10,6 +10,7 @@ public class Transactions {
     private String _id;
     private String type;
     private Double profit;
+    private Double netAmount;
 
     @Override
     public boolean equals(Object o) {
@@ -22,6 +23,14 @@ public class Transactions {
     @Override
     public int hashCode() {
         return Objects.hash(get_id());
+    }
+
+    public Double getNetAmount() {
+        return netAmount;
+    }
+
+    public void setNetAmount(Double netAmount) {
+        this.netAmount = netAmount;
     }
 
     public String getStatus() {
