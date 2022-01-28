@@ -8,5 +8,3 @@ handlers:
 
 manual_scaling:
   instances: 5
-  max_instances: 20
-  idle_timeout: 5m
