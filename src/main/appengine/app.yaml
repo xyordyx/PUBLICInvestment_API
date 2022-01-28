@@ -1,6 +1,12 @@
 runtime: java11
+env: flex
 instance_class: B4
 
-basic_scaling:
+handlers:
+  - url: /.*
+    script: this field is required, but ignored
+
+manual_scaling:
+  instances: 5
   max_instances: 20
-  idle_timeout: 10m
+  idle_timeout: 5m
