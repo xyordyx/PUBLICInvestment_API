@@ -115,7 +115,6 @@ public class Util {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
         assert date2 != null;
         return date2.getTime() - date1.getTime();
     }
@@ -137,7 +136,7 @@ public class Util {
     public static Boolean isValidData(InvestmentData data){
         if(data != null){
             return data.getInvoiceId() != null && data.getCurrency() != null && data.getAmount() != null &&
-                    data.getDebtorName() != null && data.getToken() != null;
+                    data.getDebtorName() != null;
         }
         return false;
     }
@@ -181,7 +180,7 @@ public class Util {
 
     static List<InvoiceTransactions> customReadJavaType(HttpResponse inputMessage, ObjectMapper objectMapper) throws IOException {
         try {
-            if (inputMessage instanceof MappingJackson2HttpMessageConverter) {
+            if (inputMessage instanceof MappingJacksonInputMessage) { //MappingJackson2HttpMessageConverter
                 Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
                 if (deserializationView != null) {
                     InvoiceTransactions[] op = objectMapper.readerWithView(deserializationView).forType(InvoiceTransactions[].class).
@@ -202,5 +201,10 @@ public class Util {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
             //return "JSON parse error";
         }
+    }
+
+    static Boolean isAutoManaged(String time){
+        //Asking for 5 minutes before execution time
+        return 300000 <= timesDiff(time);
     }
 }

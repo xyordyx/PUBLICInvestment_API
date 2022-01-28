@@ -60,6 +60,8 @@ public class CoreProcessor {
 
     public FinsmartData getBalance(FinsmartData smartData) {
         //int indexFinancial = smartData.getFinancialIndex();
+        double tempPENSum = 0.00;
+        double tempUSDSum = 0.00;
         for(Transactions transactions : smartData.getFinancialTransactions().getFinancialTransactions()){
             double amountInvested;
             double sum;
@@ -91,9 +93,15 @@ public class CoreProcessor {
                 if (transactions.getCurrency().equals("pen")) {
                     sum = smartData.getSolesTotalProfit() + transactions.getAmount();
                     smartData.setSolesTotalProfit(sum);
+                    if(transactions.getNetAmount() != null){
+                        tempPENSum = tempPENSum + transactions.getNetAmount();
+                    }
                 } else {
                     sum = smartData.getDollarTotalProfit() + transactions.getAmount();
                     smartData.setDollarTotalProfit(sum);
+                    if(transactions.getNetAmount() != null){
+                        tempUSDSum = tempUSDSum + transactions.getNetAmount();
+                    }
                 }
             }
             else if (transactions.getType().equals("investment") &&

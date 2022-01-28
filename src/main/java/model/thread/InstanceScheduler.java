@@ -1,8 +1,10 @@
 package model.thread;
 
 import model.finsmartData.FinsmartUtil;
+import model.firebase.DataService;
 import model.json.InvestmentData;
 import model.json.ResponseJSON;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -11,27 +13,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static model.Util.getTime;
 import static model.Util.timesDiff;
 
-public class InvestorScheduler implements Runnable{
+public class InstanceScheduler implements Runnable{
     private final AtomicBoolean running = new AtomicBoolean(true);
     private ExecutorService poolSubmit = Executors.newFixedThreadPool(1);
     private InvestmentData investmentData;
-    private String token;
     private boolean flag;
-    private Map<String, InvestorScheduler> invQueue;
+
+    private DataService dataService;
 
     private static final String amountBigger = "INVESTMENTS.INVESTMENT_AMOUNT_IS_BIGGER_THAN_TARGET_INVOICE_AVAILABLE_BALANCE";
     private static final String notPublished = "INVESTMENTS.TARGET_INVOICE_NOT_PUBLISHED";
 
-    public InvestorScheduler(InvestmentData investmentData, String token, Map<String, InvestorScheduler> invQueue) {
+    public InstanceScheduler(InvestmentData investmentData, DataService dataService) {
         this.investmentData = investmentData;
         this.flag = true;
-        this.token = token;
-        this.invQueue = invQueue;
+        this.dataService = dataService;
     }
 
     public void interrupt(){
         running.set(false);
-        //Thread.currentThread().interrupt();
         poolSubmit.shutdown();
         poolSubmit.shutdownNow();
     }
@@ -41,7 +41,7 @@ public class InvestorScheduler implements Runnable{
         Future<InvestmentData> future = poolSubmit.submit(callable);
         try {
             if(future.get() != null){
-                invQueue.put(investmentData.getInvoiceId(),this);
+                dataService.updateInvestment(investmentData,"Processed");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -55,45 +55,38 @@ public class InvestorScheduler implements Runnable{
     Callable<InvestmentData> callable = new Callable<>() {
         @Override
         public InvestmentData call()  {
-            ResponseJSON responseJSON;
+            ResponseJSON responseJSON = new ResponseJSON(true,"");
             double actualAmount;
             System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName() +" - scheduled - " + getTime());
             try {
-                TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getTime())-900);
-                //TimeUnit.MILLISECONDS.sleep(10000);
+                //TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getTime())-600);
+                TimeUnit.MILLISECONDS.sleep(100000);
             } catch (InterruptedException e) {
                 System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()+" - interrupted - " + getTime());
                 flag = false;
                 //Thread.currentThread().interrupt();
             }
             if(flag){
-                responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(),investmentData,token);
+                //responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
                 actualAmount = investmentData.getAmount();
                 //INVOICE NOT PUBLISHED YET
                 while (responseJSON.getMessage().replace('"', ' ').equals(notPublished) &&
                         !Thread.currentThread().isInterrupted()) {
-                    /*try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        System.out.println(Thread.currentThread().getName() + "Submit:" + getTime() +
-                                investmentData.getInvoiceId() + " - interrupted");
-                        Thread.currentThread().interrupt();
-                    }*/
-                    responseJSON = FinsmartUtil.postToFinSmart(investmentData.getAmount(), investmentData, token);
+                    //responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
                 }
                 //INVOICE AMOUNT IS LESS THAN DESIRED AMOUNT
                 if (responseJSON.getMessage().replace('"', ' ').equals(amountBigger)
                         && !Thread.currentThread().isInterrupted()) {
-                    actualAmount = FinsmartUtil.updateOpportunity(token, investmentData.getInvoiceId());
-                    responseJSON = FinsmartUtil.postToFinSmart(actualAmount, investmentData, token);
+                    actualAmount = FinsmartUtil.updateOpportunity(investmentData.getToken(), investmentData.getInvoiceId());
+                    //responseJSON = FinsmartUtil.postToFinSmartInstance(actualAmount, investmentData);
                     FinsmartUtil.updateInvestment(investmentData, responseJSON, 4, actualAmount);
                 }
                 //INVESTMENT COMPLETED
                 else {
                     FinsmartUtil.updateInvestment(investmentData, responseJSON, 1, null);
                 }
-                System.out.println(Thread.currentThread().getName() +
-                        investmentData.getDebtorName() + " " + " STATUS: " + investmentData.isStatus()
+                System.out.println(": "+Thread.currentThread().getName() +
+                        investmentData.getDebtorName() + " - " + "STATUS: " + investmentData.isStatus()
                         + " MSG:" + investmentData.getMessage() + " Amount:" + actualAmount+" - " + getTime());
                 investmentData.setCompleted(true);
             }

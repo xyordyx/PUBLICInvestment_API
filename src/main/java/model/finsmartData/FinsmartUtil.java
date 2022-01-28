@@ -23,6 +23,16 @@ public class FinsmartUtil {
         return responseJSON;
     }
 
+    public static ResponseJSON postToFinSmartInstance(double amount, InvestmentData investment){
+        String parameters;
+        ResponseJSON responseJSON = null;
+        parameters = generateJSONInvest(amount, investment.getCurrency(), investment.getInvoiceId());
+        while(responseJSON == null){
+            responseJSON = CIG.executeInvestment1(parameters,investment.getToken());
+        }
+        return responseJSON;
+    }
+
     public static String generateJSONInvest(double amount, String currency, String invoice_id){
         return "{\"amount\":\""+amount+"\",\"currency\":\""+currency+"\",\"invoice\":\""+invoice_id+
                 "\",\"type\":\"investment\"}";

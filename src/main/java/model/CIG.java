@@ -9,8 +9,13 @@ import model.finsmartData.FinsmartUtil;
 import model.json.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
@@ -32,6 +37,46 @@ public class CIG {
     private static String invoices="/invoices";
     private static String authenticationPath="/authentications";
     private static String opportunitiesPath="/opportunities";
+
+    private static String appEnginePath="hmrestapi-333720.uk.r.appspot.com";
+
+    public Boolean scheduleInvestment(InvestmentData investment, String url) {
+        CloseableHttpClient client = HttpClients.createDefault();
+        String stringResponse;
+        try {
+            //HttpPost httpPost = new HttpPost("https://"+url+appEnginePath);
+            HttpPost httpPost = new HttpPost("http://localhost:8080/scheduleinvestment");
+            final String json = "{" +
+                    "\"invoiceId\":\""+investment.getInvoiceId()+"\"," +
+                    "\"time\":\""+investment.getTime()+"\"," +
+                    "\"amount\":\""+investment.getAmount()+"\"," +
+                    "\"currency\":\""+investment.getCurrency()+"\"," +
+                    "\"token\":\""+investment.getToken()+"\"," +
+                    "\"message\":\""+investment.getMessage()+"\"," +
+                    "\"status\":\""+investment.isStatus()+"\"," +
+                    "\"currentState\":\""+investment.getCurrentState()+"\"," +
+                    "\"debtorName\":\""+investment.getDebtorName()+
+                    "\"}";
+            StringEntity entity = new StringEntity(json);
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Content-type", "application/json");
+
+            CloseableHttpResponse response;
+
+            response = client.execute(httpPost);
+            if(response.getStatusLine().getStatusCode() == 200) {
+                stringResponse = EntityUtils.toString(response.getEntity());
+                client.close();
+                return new ObjectMapper()
+                        .readerFor(Boolean.class)
+                        .readValue(stringResponse);
+            }
+            client.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static ResponseJSON executeInvestment1(String urlParameters, String token) {
         URL url;

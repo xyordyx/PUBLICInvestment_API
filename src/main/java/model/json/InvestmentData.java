@@ -4,16 +4,27 @@ public class InvestmentData {
     private Double amount;
     private String currency;
     private String invoiceId;
-    private int time;
+    private String time;
     private double adjustedAmount;
     private boolean autoAdjusted;
     private String debtorName;
     private String token;
 
-    private boolean isScheduled;
     private String message;
     private boolean status;
     private boolean completed;
+    private String currentState;
+
+    public InvestmentData() {
+    }
+
+    public String getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(String currentState) {
+        this.currentState = currentState;
+    }
 
     public String getToken() {
         return token;
@@ -29,14 +40,6 @@ public class InvestmentData {
 
     public void setStatus(boolean status) {
         this.status = status;
-    }
-
-    public boolean isScheduled() {
-        return isScheduled;
-    }
-
-    public void setScheduled(boolean scheduled) {
-        isScheduled = scheduled;
     }
 
     public String getDebtorName() {
@@ -59,10 +62,6 @@ public class InvestmentData {
         return message;
     }
 
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
     public double getAdjustedAmount() {
         return adjustedAmount;
     }
@@ -83,22 +82,20 @@ public class InvestmentData {
         this.message = message;
     }
 
-    public int getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(String time) {
         this.time = time;
     }
-
 
     public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
-
-        this.amount = Double.parseDouble(amount);
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 
     public String getCurrency() {
