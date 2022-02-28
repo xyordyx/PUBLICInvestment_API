@@ -1,6 +1,6 @@
 package model.finsmartData;
 
-import model.CIG;
+import model.CIGFinsmart;
 import model.json.InvestmentData;
 import model.json.Opportunities;
 import model.json.ResponseJSON;
@@ -18,7 +18,7 @@ public class FinsmartUtil {
         ResponseJSON responseJSON = null;
         parameters = generateJSONInvest(amount, investment.getCurrency(), investment.getInvoiceId());
         while(responseJSON == null){
-            responseJSON = CIG.executeInvestment1(parameters,token);
+            responseJSON = CIGFinsmart.executeInvestment1(parameters,token);
         }
         return responseJSON;
     }
@@ -28,7 +28,7 @@ public class FinsmartUtil {
         ResponseJSON responseJSON = null;
         parameters = generateJSONInvest(amount, investment.getCurrency(), investment.getInvoiceId());
         while(responseJSON == null){
-            responseJSON = CIG.executeInvestment1(parameters,investment.getToken());
+            responseJSON = CIGFinsmart.executeInvestment1(parameters,investment.getToken());
         }
         return responseJSON;
     }
@@ -63,9 +63,9 @@ public class FinsmartUtil {
     }
 
     public static double updateOpportunity(String token, String invoiceId){
-        List<Opportunities> opportunities = CIG.getOpportunitiesJSON(token);
+        List<Opportunities> opportunities = CIGFinsmart.getOpportunitiesJSON(token);
         while(opportunities == null){
-            opportunities = CIG.getOpportunitiesJSON(token);
+            opportunities = CIGFinsmart.getOpportunitiesJSON(token);
         }
         return updateAmountAvailable(opportunities,invoiceId);
     }

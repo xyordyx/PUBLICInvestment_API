@@ -1,8 +1,13 @@
-package model.firebase;
+package model.json.firestore.instances;
 
 public class InstanceData {
     private String id;
     private int version;
+
+    public InstanceData(String id, int version) {
+        this.id = id;
+        this.version = version;
+    }
 
     public String getId() {
         return id;

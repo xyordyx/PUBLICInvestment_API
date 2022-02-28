@@ -12,11 +12,12 @@ import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
 import model.json.Transactions;
+import model.json.firestore.investments.Document;
+import model.json.firestore.investments.Investments;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
 
 import java.io.IOException;
@@ -166,7 +167,7 @@ public class Util {
         return data;
     }
 
-    static ObjectMapper initiatePrettyObjectMapper() {
+    public static ObjectMapper initiatePrettyObjectMapper() {
         ObjectMapper customObjectMapper = new ObjectMapper();
         customObjectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         customObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -206,5 +207,25 @@ public class Util {
     static Boolean isAutoManaged(String time){
         //Asking for 5 minutes before execution time
         return 300000 <= timesDiff(time);
+    }
+
+    public static List<InvestmentData> getListInvestmentData(Investments investments){
+        List<InvestmentData> response = new ArrayList<>();
+        if(investments.getDocuments() != null) {
+            for (Document inv : investments.getDocuments()) {
+                response.add(new InvestmentData(inv));
+            }
+        }
+        return response;
+    }
+
+    public static List<InvestmentData> getListInvestmentFromList(Investments [] investments){
+        List<InvestmentData> response = new ArrayList<>();
+        for(Investments inv: investments){
+            if(inv.getDocument() != null){
+                response.add(new InvestmentData(inv.getDocument()));
+            }
+        }
+        return response;
     }
 }

@@ -1,5 +1,7 @@
 package model.json;
 
+import model.json.firestore.investments.Document;
+
 public class InvestmentData {
     private Double amount;
     private String currency;
@@ -14,8 +16,49 @@ public class InvestmentData {
     private boolean status;
     private boolean completed;
     private String currentState;
+    private String fireToken;
 
     public InvestmentData() {
+        this.amount = 0.00;
+        this.adjustedAmount = 0.00;
+        this.currency = "";
+        this.invoiceId = "";
+        this.time = "";
+        this.autoAdjusted = false;
+        this.debtorName = "";
+        this.token = "";
+        this.message = "";
+        this.status = false;
+        this.completed = false;
+        this.currentState = "";
+        this.fireToken = "";
+    }
+
+    public InvestmentData(Document document){
+        if(document.getFields().getAmount().getDoubleValue() != null){
+            this.amount = document.getFields().getAmount().getDoubleValue();
+        }else this.amount = 0.00;
+        if(document.getFields().getAdjustedAmount().getDoubleValue() != null){
+            this.adjustedAmount = document.getFields().getAdjustedAmount().getDoubleValue();
+        }else this.adjustedAmount = 0.00;
+        this.currency = document.getFields().getCurrency().getStringValue();
+        this.invoiceId = document.getFields().getInvoiceId().getStringValue();
+        this.time = document.getFields().getTime().getStringValue();
+        this.autoAdjusted = document.getFields().getAutoAdjusted().getBooleanValue();
+        this.debtorName = document.getFields().getDebtorName().getStringValue();
+        this.token = document.getFields().getToken().getStringValue();
+        this.message = document.getFields().getMessage().getStringValue();
+        this.status = document.getFields().getStatus().getBooleanValue();
+        this.completed = document.getFields().getCompleted().getBooleanValue();
+        this.currentState = document.getFields().getCurrentState().getStringValue();
+    }
+
+    public String getFireToken() {
+        return fireToken;
+    }
+
+    public void setFireToken(String fireToken) {
+        this.fireToken = fireToken;
     }
 
     public String getCurrentState() {

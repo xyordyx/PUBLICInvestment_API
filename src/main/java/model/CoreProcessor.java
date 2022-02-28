@@ -14,7 +14,7 @@ public class CoreProcessor {
 
     public FinsmartData getExtraData(FinsmartData smartData, String token) {
         if(smartData.getInvoiceIndex() == null){
-            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            List<InvoiceTransactions> temp = CIGFinsmart.getInvoices(token);
             if(temp != null){
                 smartData.setInvoiceIndex(Util.indexInvoices(temp));
             }else return null;
@@ -147,7 +147,7 @@ public class CoreProcessor {
 
     public APIDebtorData getDebtorHistory(FinsmartData smartData, String debtor, String token) {
         if(smartData.getInvoiceIndex() == null){
-            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            List<InvoiceTransactions> temp = CIGFinsmart.getInvoices(token);
             if(temp != null){
                 smartData.setInvoiceIndex(Util.indexInvoices(temp));
             }else return null;
@@ -171,7 +171,7 @@ public class CoreProcessor {
 
     public APIDebtorData getCurrentInvestments(FinsmartData smartData, String token) {
         if(smartData.getInvoiceIndex() == null){
-            List<InvoiceTransactions> temp = CIG.getInvoices(token);
+            List<InvoiceTransactions> temp = CIGFinsmart.getInvoices(token);
             if(temp != null){
                 smartData.setInvoiceIndex(Util.indexInvoices(temp));
             }else return null;

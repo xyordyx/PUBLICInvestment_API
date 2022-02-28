@@ -31,7 +31,7 @@ import java.util.List;
 
 import static model.Util.getTime;
 
-public class CIG {
+public class CIGFinsmart {
     private static String smartURLv1 = "https://api.finsmart.pe/api/v1";
     private static String financialTransactionsPath="/financial-transactions";
     private static String invoices="/invoices";
@@ -44,7 +44,7 @@ public class CIG {
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse;
         try {
-            //HttpPost httpPost = new HttpPost("https://"+url+appEnginePath);
+            //HttpPost httpPost = new HttpPost("https://"+url+appEnginePath+"scheduleinvestment");
             HttpPost httpPost = new HttpPost("http://localhost:8080/scheduleinvestment");
             final String json = "{" +
                     "\"invoiceId\":\""+investment.getInvoiceId()+"\"," +

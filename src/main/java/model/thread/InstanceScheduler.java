@@ -1,9 +1,10 @@
 package model.thread;
 
 import model.finsmartData.FinsmartUtil;
-import model.firebase.DataService;
+import model.firebase.CIGGoogleServices;
 import model.json.InvestmentData;
 import model.json.ResponseJSON;
+import model.json.firestore.investments.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -19,15 +20,12 @@ public class InstanceScheduler implements Runnable{
     private InvestmentData investmentData;
     private boolean flag;
 
-    private DataService dataService;
-
     private static final String amountBigger = "INVESTMENTS.INVESTMENT_AMOUNT_IS_BIGGER_THAN_TARGET_INVOICE_AVAILABLE_BALANCE";
     private static final String notPublished = "INVESTMENTS.TARGET_INVOICE_NOT_PUBLISHED";
 
-    public InstanceScheduler(InvestmentData investmentData, DataService dataService) {
+    public InstanceScheduler(InvestmentData investmentData) {
         this.investmentData = investmentData;
         this.flag = true;
-        this.dataService = dataService;
     }
 
     public void interrupt(){
@@ -41,7 +39,13 @@ public class InstanceScheduler implements Runnable{
         Future<InvestmentData> future = poolSubmit.submit(callable);
         try {
             if(future.get() != null){
-                dataService.updateInvestment(investmentData,"Processed");
+                CIGGoogleServices cig = new CIGGoogleServices();
+                Document document = cig.getInvestmentsById(investmentData.getFireToken(),investmentData.getInvoiceId());
+                if(document != null){
+                    InvestmentData tempData = new InvestmentData(document);
+                    tempData.setCurrentState("Processed");
+                    cig.updateInvestment(investmentData.getFireToken(),tempData);
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -3,15 +3,13 @@ package model;
 import model.finsmartData.APIData;
 import model.finsmartData.APIDebtorData;
 import model.finsmartData.FinsmartData;
-import model.firebase.DataService;
-import model.firebase.InstanceData;
-import model.json.Debtor;
+import model.firebase.CIGGoogleServices;
+import model.json.firestore.instances.Document;
+import model.json.firestore.instances.InstanceData;
 import model.json.FinancialTransactions;
 import model.json.InvestmentData;
-import model.json.ResponseJSON;
+import model.json.firestore.investments.Investments;
 import model.thread.InstanceScheduler;
-import model.thread.InvestorScheduler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StopWatch;
@@ -20,25 +18,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 public class MainController {
 
-    @Autowired
-    private DataService dataService;
-
     private CoreProcessor core = new CoreProcessor();
     private FinsmartData data = new FinsmartData();
     private ExecutorService threadPool = Executors.newFixedThreadPool(10);
-    private ConcurrentHashMap<String, InvestorScheduler> invQueue = new ConcurrentHashMap<>();
-    private ArrayList<InvestmentData> activeInvestments = new ArrayList<>();
-
-    public boolean tempFlag = true;
-    public ArrayList<Integer> temp = new ArrayList<>();
 
     @GetMapping("/getbalance")
     public ResponseEntity<APIData> getBalance(@RequestHeader Map<String, String> headers) {
@@ -46,7 +34,7 @@ public class MainController {
         if(!token.isEmpty()){
             StopWatch sw = new org.springframework.util.StopWatch();
             sw.start("Method-1 Finsmart Financial Transactions");
-            FinancialTransactions transactions = new CIG().getFinancialTransactions(token);
+            FinancialTransactions transactions = new CIGFinsmart().getFinancialTransactions(token);
             sw.stop();
 
             sw.start("Method-2 Get Balance");
@@ -132,114 +120,149 @@ public class MainController {
         }return null;
     }
 
-    @GetMapping("/")
-    public String hello() {
-        return "<center><h1>Live and ready to rock</h1></center>";
-    }
-
-    @RequestMapping(value = "/hello", method = RequestMethod.GET, produces = {"application/json"})
-    public @ResponseBody ResponseEntity<ArrayList<Integer>> initial() {
-        if(tempFlag){
-            temp.add(ThreadLocalRandom.current().nextInt(0,20));
-            temp.add(ThreadLocalRandom.current().nextInt(0,20));
-            temp.add(ThreadLocalRandom.current().nextInt(0,20));
-            temp.add(ThreadLocalRandom.current().nextInt(0,20));
-            temp.add(ThreadLocalRandom.current().nextInt(0,20));
-            tempFlag = false;
-        }
-        return ResponseEntity.ok(temp);
-    }
-
-    @RequestMapping(value = "/chao", method = RequestMethod.GET, produces = {"application/json"})
-    public @ResponseBody ResponseEntity<ArrayList<Integer>> chao() {
-        if(!temp.isEmpty()){
-            temp.remove(0);
-        }
-        return ResponseEntity.ok(temp);
-    }
-
     @PostMapping(value = "/createinvestment")
-    public ResponseEntity<Object> createInvestment(@RequestBody InvestmentData investment) throws Exception {
+    public ResponseEntity<Object> createInvestment(@RequestBody InvestmentData investment) {
+        CIGGoogleServices cig = new CIGGoogleServices();
         investment.setCompleted(false);
-        if(Util.isAutoManaged(investment.getTime())){
+        if (Util.isAutoManaged(investment.getTime())) {
             investment.setCurrentState("DB");
-            return new ResponseEntity<>(dataService.saveInvestment(investment,"DB"), HttpStatus.OK);
+            return new ResponseEntity<>(cig.createInvestment(investment.getFireToken(), investment), HttpStatus.OK);
         } else {
             investment.setCurrentState("Manual_DB");
-            if(dataService.saveInvestment(investment,"Manual_DB")){
-                int version = 1;
-                InstanceData instanceData = dataService.getInstanceById(investment.getInvoiceId());
-                if(dataService.saveInstance(investment.getInvoiceId(),version)){
-                    String url = investment.getInvoiceId()+"."+version+".";
-                    Boolean responseJSON = new CIG().scheduleInvestment(investment,url);
-                    if(responseJSON){
-                        return new ResponseEntity<>(true, HttpStatus.OK);
-                    }
-                }else{
-                    version = instanceData.getVersion()+1;
-                    if(dataService.updateInstance(investment.getInvoiceId(),version)){
-                        String url = investment.getInvoiceId()+"."+version+".";
-                        Boolean responseJSON = new CIG().scheduleInvestment(investment,url);
-                        if(responseJSON){
-                            return new ResponseEntity<>(true, HttpStatus.OK);
-                        }
-                    }
+            Document instanceData = cig.getInstanceById(investment.getFireToken(), investment.getInvoiceId());
+            int version = 1;
+            if (instanceData != null) {
+                version = instanceData.getFields().getVersion().getIntegerValue() + 1;
+                instanceData.getFields().getVersion().setIntegerValue(version);
+                cig.updateInstance(investment.getFireToken(), instanceData);
+            } else {
+                cig.createInstance(investment.getFireToken(), new InstanceData(investment.getInvoiceId(), version));
+            }
+            String scheduleURL = investment.getInvoiceId() + "-dot-" + version + "-dot-s1-dot-";
+            Boolean responseJSON = new CIGFinsmart().scheduleInvestment(investment, scheduleURL);
+            if (responseJSON) {
+                if (cig.createInvestment(investment.getFireToken(), investment)) {
+                    return new ResponseEntity<>(cig.createInvestment(investment.getFireToken(), investment), HttpStatus.OK);
                 }
             }
         }
         return new ResponseEntity<>("", HttpStatus.CONFLICT);
     }
 
+    //NOT CALLED FROM APP
     @PostMapping(value = "/scheduleinvestment")
     public ResponseEntity<Boolean> scheduleInvestment(@RequestBody InvestmentData investment) {
-        InstanceScheduler inv =  new InstanceScheduler(investment,dataService);
+        InstanceScheduler inv =  new InstanceScheduler(investment);
         threadPool.submit(inv);
         String temp;
         if(investment.getCurrentState().equals("DB")){
             temp = "Instance_Schedule";
         }else temp = "Manual_DB";
-        if(dataService.updateInvestment(investment,temp)){
-            return ResponseEntity.status(200).body(true);
+
+        CIGGoogleServices cig = new CIGGoogleServices();
+        model.json.firestore.investments.Document document =
+                cig.getInvestmentsById(investment.getFireToken(),investment.getInvoiceId());
+        if(document != null){
+            InvestmentData tempData = new InvestmentData(document);
+            tempData.setCurrentState(temp);
+            if(cig.updateInvestment(investment.getFireToken(),tempData)){
+                return ResponseEntity.status(200).body(true);
+            }
         }
         return ResponseEntity.badRequest().body(false);
     }
 
     @DeleteMapping(value = "/stopinvestment")
     @ResponseBody
-    public ResponseEntity<List<InvestmentData>> stopInvestment(@RequestParam(name = "filter")String id,
+    public ResponseEntity<List<InvestmentData>> stopInvestment(@RequestHeader Map<String, String> headers,
+                                                               @RequestParam(name = "filter")String id,
                                                                @RequestParam(name = "caller")Boolean isCompleted){
-        InvestmentData data = dataService.getInvestmentById(id);
+        String token = headers.get("firestoretoken");
+        CIGGoogleServices cig = new CIGGoogleServices();
+        model.json.firestore.investments.Document data = cig.getInvestmentsById(token,id);
         if(data != null){
             if(!isCompleted){
-                if(data.getCurrentState().equals("DB") || data.getCurrentState().equals("Manual_DB")){
-                    if(dataService.deleteInvestmentById(id)){
-                        return new ResponseEntity<>(dataService.getInvestmentsByCompleted(false), HttpStatus.OK);
+                if(data.getFields().getCurrentState().getStringValue().equals("DB") ||
+                        data.getFields().getCurrentState().getStringValue().equals("Manual_DB")){
+                    if(cig.deleteInvestment(token,id)){
+                        return new ResponseEntity<>((Util.getListInvestmentFromList
+                                (cig.getInvestmentsByCompleted(token,false))), HttpStatus.OK);
                     }
                 }
-                else if(data.getCurrentState().equals("Scheduled")){
+                else if(data.getFields().getCurrentState().getStringValue().equals("Scheduled")){
                     //TODO: ELIMINAR INSTANCIA
                 }
             }else{
-                if(data.getCurrentState().equals("Processed")){
-                    if(dataService.updateInvestment(data,"Removed")){
-                        return new ResponseEntity<>(dataService.getInvestmentsByCompleted(true),HttpStatus.OK);
-                    }
+                InvestmentData tempData = new InvestmentData(data);
+                tempData.setCurrentState("Removed");
+                if(cig.updateInvestment(token,tempData)){
+                    return new ResponseEntity<>((Util.getListInvestmentFromList
+                            (cig.getInvestmentsByCompleted(token,true))), HttpStatus.OK);
                 }
+
             }
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/currentschedule")
-    public ResponseEntity<ArrayList<InvestmentData>> currentSchedule() {
-        return ResponseEntity.ok(new ArrayList<>(dataService.getAllInvestments()));
+    public ResponseEntity<ArrayList<InvestmentData>> currentSchedule(@RequestHeader Map<String, String> headers) {
+        CIGGoogleServices cig = new CIGGoogleServices();
+        String token = headers.get("firestoretoken");
+        return ResponseEntity.ok(new ArrayList<>(Util.getListInvestmentData
+                ((Investments) cig.getCollections(token,"Investments"))));
     }
 
     @GetMapping(value = "/getbycompleted")
-    public ResponseEntity<ArrayList<InvestmentData>> getByCompleted(@RequestParam(name = "filter")Boolean isCompleted){
-        List<InvestmentData> a = dataService.getInvestmentsByCompleted(true);
-        List<InvestmentData> b = dataService.getInvestmentsByCompleted(false);
-        return ResponseEntity.ok(new ArrayList<>(dataService.getInvestmentsByCompleted(isCompleted)));
+    public ResponseEntity<ArrayList<InvestmentData>> getByCompleted(@RequestHeader Map<String, String> headers,
+                                                                    @RequestParam(name = "filter")Boolean isCompleted){
+        CIGGoogleServices cig = new CIGGoogleServices();
+        String token = headers.get("firestoretoken");
+        List<InvestmentData> a = Util.getListInvestmentFromList(cig.getInvestmentsByCompleted(token,isCompleted));
+        return ResponseEntity.ok(new ArrayList<>
+                (Util.getListInvestmentFromList(cig.getInvestmentsByCompleted(token,isCompleted))));
+    }
+
+    @GetMapping("/")
+    public String hello() {
+        return "<center><h1>Live and ready to rock</h1></center>";
+    }
+
+    @RequestMapping(value = "/fire", method = RequestMethod.GET, produces = {"application/json"})
+    public @ResponseBody void fire() {
+        CIGGoogleServices cig = new CIGGoogleServices();
+        String a = cig.getFireToken("u@ser.com","root12");
+        /*Object b = cig.getInvestmentsByCompleted(a,false);
+        Investments[] x = (Investments []) b;
+        Object b = cig.getCollections("Investments",a);
+        Investments x = (Investments)b;
+        x.getDocuments().get(0).getFields().getCompleted().getBooleanValue();
+
+        InstanceData z = new InstanceData();
+        z.setId("asdfsf324324123");
+        z.setVersion(123);
+        cig.createInstance(a,z);
+
+        InstanceData z = new InstanceData();
+        z.setId("123456");
+        z.setVersion(1985);
+        cig.updateInstance(a,z);
+
+        InvestmentData z = new InvestmentData();
+        cig.createInvestment(a,z);
+
+        Document z = cig.getInvestmentsById(a,"sdfdsfds66666");
+        z.getFields().getDebtorName().setStringValue("UPDATED DEBTORv2");
+        InvestmentData investmentData = new InvestmentData(z);
+        cig.updateInvestment(a,investmentData);
+
+        cig.deleteInvestment(a,"pennywisesdfdsfds66666");
+
+        cig.deleteInstance(a,"CHACHA");
+
+        Document x = cig.getInstanceById(a,"CHACHO");
+        */
+        System.out.println();
     }
 
 }
