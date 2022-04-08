@@ -69,10 +69,10 @@ public class CoreProcessor {
             if (transactions.getType().equals("deposit") &&
                     transactions.getStatus().equals("approved")) {
                 if (transactions.getCurrency().equals("pen")) {
-                    smartData.setSolesTotalDeposited(smartData.getSolesTotalDeposited() +
+                    smartData.setTotalPENDeposited(smartData.getTotalPENDeposited() +
                             transactions.getAmount());
                 } else {
-                    smartData.setDollarTotalDeposited(smartData.getDollarTotalDeposited() +
+                    smartData.setTotalUSDDeposited(smartData.getTotalUSDDeposited() +
                             transactions.getAmount());
                 }
             }
@@ -80,10 +80,10 @@ public class CoreProcessor {
             else if (transactions.getType().equals("retention") &&
                     transactions.getStatus().equals("approved")) {
                 if (transactions.getCurrency().equals("pen")) {
-                    smartData.setSolesRetentions(smartData.getSolesRetentions() +
+                    smartData.setTotalPENRetentions(smartData.getTotalPENRetentions() +
                             transactions.getAmount());
                 } else {
-                    smartData.setDollarRetentions(smartData.getDollarRetentions() +
+                    smartData.setTotalUSDRetentions(smartData.getTotalUSDRetentions() +
                             transactions.getAmount());
                 }
             }
@@ -91,14 +91,14 @@ public class CoreProcessor {
             else if (transactions.getType().equals("investment return") &&
                     transactions.getStatus().equals("approved")) {
                 if (transactions.getCurrency().equals("pen")) {
-                    sum = smartData.getSolesTotalProfit() + transactions.getAmount();
-                    smartData.setSolesTotalProfit(sum);
+                    sum = smartData.getTotalPENProfited() + transactions.getAmount();
+                    smartData.setTotalPENProfited(sum);
                     if(transactions.getNetAmount() != null){
                         tempPENSum = tempPENSum + transactions.getNetAmount();
                     }
                 } else {
-                    sum = smartData.getDollarTotalProfit() + transactions.getAmount();
-                    smartData.setDollarTotalProfit(sum);
+                    sum = smartData.getTotalUSDProfited() + transactions.getAmount();
+                    smartData.setTotalUSDProfited(sum);
                     if(transactions.getNetAmount() != null){
                         tempUSDSum = tempUSDSum + transactions.getNetAmount();
                     }
@@ -111,20 +111,20 @@ public class CoreProcessor {
             //INVESTMENTS IN COLLECTION
             else if(transactions.getStatus().equals("investment start")){
                 if (transactions.getCurrency().equals("pen")) {
-                    smartData.setSolesCurrentInvested(smartData.getSolesCurrentInvested() + transactions.getAmount());
+                    smartData.setTotalPENCurrentInvested(smartData.getTotalPENCurrentInvested() + transactions.getAmount());
                 } else {
-                    smartData.setDollarCurrentInvested(smartData.getDollarCurrentInvested() + transactions.getAmount());
+                    smartData.setTotalUSDCurrentInvested(smartData.getTotalUSDCurrentInvested() + transactions.getAmount());
                 }
             }
             //TOTAL CURRENT IN PROGRESS
             else if (transactions.getType().equals("investment") &&
                     transactions.getStatus().equals("in progress")) {
                     if (transactions.getCurrency().equals("pen")) {
-                        amountInvested = smartData.getSolesCurrentInvested() + transactions.getAmount();
-                        smartData.setSolesCurrentInvested(amountInvested);
+                        amountInvested = smartData.getTotalPENCurrentInvested() + transactions.getAmount();
+                        smartData.setTotalPENCurrentInvested(amountInvested);
                     } else {
-                        amountInvested = smartData.getDollarCurrentInvested() + transactions.getAmount();
-                        smartData.setDollarCurrentInvested(amountInvested);
+                        amountInvested = smartData.getTotalUSDCurrentInvested() + transactions.getAmount();
+                        smartData.setTotalUSDCurrentInvested(amountInvested);
                     }
                     smartData.getTransactionsHashMap().put(transactions.getInvoice().get_id(),transactions);
             }
@@ -134,13 +134,13 @@ public class CoreProcessor {
             }*/
         }
         //TOTAL PROFIT LESS RETENTIONS
-        smartData.setSolesTotalProfit(smartData.getSolesTotalProfit() - smartData.getSolesRetentions());
-        smartData.setDollarTotalProfit(smartData.getDollarTotalProfit() - smartData.getDollarRetentions());
+        smartData.setTotalPENProfited(smartData.getTotalPENProfited() - smartData.getTotalPENRetentions());
+        smartData.setTotalUSDProfited(smartData.getTotalUSDProfited() - smartData.getTotalUSDRetentions());
         //TOTAL AVAILABLE
-        smartData.setSolesAmountAvailable((smartData.getSolesTotalDeposited() + smartData.getSolesTotalProfit()) -
-                smartData.getSolesCurrentInvested() + smartData.getSolesAmountAvailable());
-        smartData.setDollarAmountAvailable((smartData.getDollarTotalDeposited() + smartData.getDollarTotalProfit()) -
-                smartData.getDollarCurrentInvested() + smartData.getDollarAmountAvailable());
+        smartData.setTotalPENAvailable((smartData.getTotalPENDeposited() + smartData.getTotalPENProfited()) -
+                smartData.getTotalPENCurrentInvested() + smartData.getTotalPENAvailable());
+        smartData.setTotalUSDAvailable((smartData.getTotalUSDDeposited() + smartData.getTotalUSDProfited()) -
+                smartData.getTotalUSDCurrentInvested() + smartData.getTotalUSDAvailable());
         smartData.setFinancialIndex(smartData.getFinancialTransactions().getFinancialTransactions().size());
         return smartData;
     }

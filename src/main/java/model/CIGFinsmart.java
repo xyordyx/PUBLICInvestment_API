@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import model.finsmartData.FinsmartUtil;
 import model.json.*;
@@ -14,6 +15,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -28,17 +30,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static model.Util.getTime;
 
 public class CIGFinsmart {
-    private static String smartURLv1 = "https://api.finsmart.pe/api/v1";
-    private static String financialTransactionsPath="/financial-transactions";
-    private static String invoices="/invoices";
-    private static String authenticationPath="/authentications";
-    private static String opportunitiesPath="/opportunities";
+    private static final String smartURLv1 = "https://api.finsmart.pe/api/v1";
+    private static final String financialTransactionsPath="/financial-transactions";
+    private static final String invoices="/invoices";
+    private static final String authenticationPath="/authentications";
+    private static final String opportunitiesPath="/opportunities";
 
-    private static String appEnginePath="hmrestapi-333720.uk.r.appspot.com";
+    private static final String appEnginePath="hmrestapi-333720.uk.r.appspot.com";
 
     public Boolean scheduleInvestment(InvestmentData investment, String url) {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -51,7 +54,7 @@ public class CIGFinsmart {
                     "\"time\":\""+investment.getTime()+"\"," +
                     "\"amount\":\""+investment.getAmount()+"\"," +
                     "\"currency\":\""+investment.getCurrency()+"\"," +
-                    "\"token\":\""+investment.getToken()+"\"," +
+                    "\"token\":\""+investment.getSmartToken()+"\"," +
                     "\"message\":\""+investment.getMessage()+"\"," +
                     "\"status\":\""+investment.isStatus()+"\"," +
                     "\"currentState\":\""+investment.getCurrentState()+"\"," +
@@ -225,7 +228,7 @@ public class CIGFinsmart {
         return null;
     }*/
 
-    public static List<Opportunities> getOpportunitiesJSON(String token) {
+    public static ArrayList<Opportunities> getOpportunitiesJSON(String token) {
         URL url;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try {

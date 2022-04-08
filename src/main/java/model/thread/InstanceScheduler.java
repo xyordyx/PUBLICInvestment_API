@@ -1,31 +1,30 @@
 package model.thread;
 
 import model.finsmartData.FinsmartUtil;
-import model.firebase.CIGGoogleServices;
+import model.GoogleCloud.CIGFireStore;
 import model.json.InvestmentData;
 import model.json.ResponseJSON;
 import model.json.firestore.investments.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static model.Util.getTime;
-import static model.Util.timesDiff;
 
 public class InstanceScheduler implements Runnable{
     private final AtomicBoolean running = new AtomicBoolean(true);
-    private ExecutorService poolSubmit = Executors.newFixedThreadPool(1);
-    private InvestmentData investmentData;
+    private final ExecutorService poolSubmit = Executors.newFixedThreadPool(1);
+    private final InvestmentData investmentData;
     private boolean flag;
+    private final String googleToken;
 
     private static final String amountBigger = "INVESTMENTS.INVESTMENT_AMOUNT_IS_BIGGER_THAN_TARGET_INVOICE_AVAILABLE_BALANCE";
     private static final String notPublished = "INVESTMENTS.TARGET_INVOICE_NOT_PUBLISHED";
 
-    public InstanceScheduler(InvestmentData investmentData) {
+    public InstanceScheduler(InvestmentData investmentData,String googleToken) {
         this.investmentData = investmentData;
         this.flag = true;
+        this.googleToken = googleToken;
     }
 
     public void interrupt(){
@@ -39,12 +38,12 @@ public class InstanceScheduler implements Runnable{
         Future<InvestmentData> future = poolSubmit.submit(callable);
         try {
             if(future.get() != null){
-                CIGGoogleServices cig = new CIGGoogleServices();
-                Document document = cig.getInvestmentsById(investmentData.getFireToken(),investmentData.getInvoiceId());
+                CIGFireStore cig = new CIGFireStore();
+                Document document = cig.getInvestmentsById(googleToken,investmentData.getInvoiceId());
                 if(document != null){
                     InvestmentData tempData = new InvestmentData(document);
                     tempData.setCurrentState("Processed");
-                    cig.updateInvestment(investmentData.getFireToken(),tempData);
+                    cig.updateFireInvestment(googleToken,tempData);
                 }
             }
         } catch (InterruptedException e) {
@@ -81,7 +80,7 @@ public class InstanceScheduler implements Runnable{
                 //INVOICE AMOUNT IS LESS THAN DESIRED AMOUNT
                 if (responseJSON.getMessage().replace('"', ' ').equals(amountBigger)
                         && !Thread.currentThread().isInterrupted()) {
-                    actualAmount = FinsmartUtil.updateOpportunity(investmentData.getToken(), investmentData.getInvoiceId());
+                    actualAmount = FinsmartUtil.updateOpportunity(investmentData.getSmartToken(), investmentData.getInvoiceId());
                     //responseJSON = FinsmartUtil.postToFinSmartInstance(actualAmount, investmentData);
                     FinsmartUtil.updateInvestment(investmentData, responseJSON, 4, actualAmount);
                 }

@@ -2,21 +2,23 @@ package model.json;
 
 import model.json.firestore.investments.Document;
 
+import java.util.Objects;
+
 public class InvestmentData {
     private Double amount;
     private String currency;
     private String invoiceId;
     private String time;
-    private double adjustedAmount;
+    private Double adjustedAmount;
     private boolean autoAdjusted;
     private String debtorName;
-    private String token;
+    private String smartToken;
+    private String saltPass;
 
     private String message;
     private boolean status;
     private boolean completed;
     private String currentState;
-    private String fireToken;
 
     public InvestmentData() {
         this.amount = 0.00;
@@ -26,39 +28,53 @@ public class InvestmentData {
         this.time = "";
         this.autoAdjusted = false;
         this.debtorName = "";
-        this.token = "";
+        this.smartToken = "";
         this.message = "";
         this.status = false;
         this.completed = false;
         this.currentState = "";
-        this.fireToken = "";
+        this.saltPass = "";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getInvoiceId());
     }
 
     public InvestmentData(Document document){
         if(document.getFields().getAmount().getDoubleValue() != null){
             this.amount = document.getFields().getAmount().getDoubleValue();
         }else this.amount = 0.00;
-        if(document.getFields().getAdjustedAmount().getDoubleValue() != null){
-            this.adjustedAmount = document.getFields().getAdjustedAmount().getDoubleValue();
+        if(document.getFields().getAdjustedAmount().getStringValue() != null){
+            this.adjustedAmount = document.getFields().getAdjustedAmount().getStringValue();
         }else this.adjustedAmount = 0.00;
         this.currency = document.getFields().getCurrency().getStringValue();
         this.invoiceId = document.getFields().getInvoiceId().getStringValue();
         this.time = document.getFields().getTime().getStringValue();
         this.autoAdjusted = document.getFields().getAutoAdjusted().getBooleanValue();
         this.debtorName = document.getFields().getDebtorName().getStringValue();
-        this.token = document.getFields().getToken().getStringValue();
+        this.smartToken = document.getFields().getToken().getStringValue();
         this.message = document.getFields().getMessage().getStringValue();
         this.status = document.getFields().getStatus().getBooleanValue();
         this.completed = document.getFields().getCompleted().getBooleanValue();
         this.currentState = document.getFields().getCurrentState().getStringValue();
+        this.saltPass = document.getFields().getSaltPass().getStringValue();
     }
 
-    public String getFireToken() {
-        return fireToken;
+    public String getSaltPass() {
+        return saltPass;
     }
 
-    public void setFireToken(String fireToken) {
-        this.fireToken = fireToken;
+    public void setSaltPass(String saltPass) {
+        this.saltPass = saltPass;
+    }
+
+    public Double getAdjustedAmount() {
+        return adjustedAmount;
+    }
+
+    public void setAdjustedAmount(Double adjustedAmount) {
+        this.adjustedAmount = adjustedAmount;
     }
 
     public String getCurrentState() {
@@ -69,12 +85,12 @@ public class InvestmentData {
         this.currentState = currentState;
     }
 
-    public String getToken() {
-        return token;
+    public String getSmartToken() {
+        return smartToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setSmartToken(String smartToken) {
+        this.smartToken = smartToken;
     }
 
     public boolean isStatus() {
@@ -103,14 +119,6 @@ public class InvestmentData {
 
     public String getMessage() {
         return message;
-    }
-
-    public double getAdjustedAmount() {
-        return adjustedAmount;
-    }
-
-    public void setAdjustedAmount(double adjustedAmount) {
-        this.adjustedAmount = adjustedAmount;
     }
 
     public boolean isAutoAdjusted() {

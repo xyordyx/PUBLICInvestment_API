@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "message",
     "amount",
     "time",
-    "token",
+    "smartToken",
     "adjustedAmount",
     "currency",
     "status",
@@ -34,8 +34,8 @@ public class Fields {
     private Amount amount;
     @JsonProperty("time")
     private Time time;
-    @JsonProperty("token")
-    private Token token;
+    @JsonProperty("smartToken")
+    private smartToken smartToken;
     @JsonProperty("adjustedAmount")
     private AdjustedAmount adjustedAmount;
     @JsonProperty("currency")
@@ -46,6 +46,18 @@ public class Fields {
     private InvoiceId invoiceId;
     @JsonProperty("autoAdjusted")
     private AutoAdjusted autoAdjusted;
+    @JsonProperty("saltPass")
+    private SaltPass saltPass;
+
+    @JsonProperty("saltPass")
+    public SaltPass getSaltPass() {
+        return saltPass;
+    }
+
+    @JsonProperty("saltPass")
+    public void setSaltPass(SaltPass saltPass) {
+        this.saltPass = saltPass;
+    }
 
     @JsonProperty("debtorName")
     public DebtorName getDebtorName() {
@@ -107,14 +119,14 @@ public class Fields {
         this.time = time;
     }
 
-    @JsonProperty("token")
-    public Token getToken() {
-        return token;
+    @JsonProperty("smartToken")
+    public smartToken getToken() {
+        return smartToken;
     }
 
-    @JsonProperty("token")
-    public void setToken(Token token) {
-        this.token = token;
+    @JsonProperty("smartToken")
+    public void setToken(smartToken smartToken) {
+        this.smartToken = smartToken;
     }
 
     @JsonProperty("adjustedAmount")

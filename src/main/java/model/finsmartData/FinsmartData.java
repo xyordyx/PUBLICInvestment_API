@@ -3,28 +3,38 @@ package model.finsmartData;
 import model.json.FinancialTransactions;
 import model.json.Transactions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FinsmartData {
-    private double solesAmountAvailable;
-    private double dollarAmountAvailable;
-    private double solesCurrentInvested;
-    private double dollarCurrentInvested;
-    private double solesTotalDeposited;
-    private double dollarTotalDeposited;
-    private double solesTotalProfit;
-    private double dollarTotalProfit;
-    private double solesProfitExpected;
-    private double dollarProfitExpected;
-    private double solesRetentions;
-    private double dollarRetentions;
+
+    private double totalPENAvailable;
+    private double totalUSDAvailable;
+
+    private double totalPENScheduled;
+    private double totalUSDScheduled;
+
+    private double totalPENDeposited;
+    private double totalUSDDeposited;
+
+    private double totalPENRetentions;
+    private double totalUSDRetentions;
+
+    private double totalPENProfited;
+    private double totalUSDProfited;
+
+    private double totalPENCurrentInvested;
+    private double totalUSDCurrentInvested;
+
     private double solesOnRisk;
     private double dollarOnRisk;
 
+    private double solesProfitExpected;
+    private double dollarProfitExpected;
+
+    private int scheduledInvestmentsNum;
+
     private int invoicesIndex;
     private int financialIndex;
-    private ArrayList<Transactions> currentDebtorFilter;
     private FinancialTransactions financialTransactions;
 
     //Investments in progress Indexed
@@ -33,8 +43,31 @@ public class FinsmartData {
     private HashMap<String,Transactions> transactionsHashMap;
 
     public FinsmartData() {
-        this.currentDebtorFilter = new ArrayList<>();
         this.transactionsHashMap = new HashMap<>();
+    }
+
+    public double getTotalPENScheduled() {
+        return totalPENScheduled;
+    }
+
+    public void setTotalPENScheduled(double totalPENScheduled) {
+        this.totalPENScheduled = totalPENScheduled;
+    }
+
+    public int getScheduledInvestmentsNum() {
+        return scheduledInvestmentsNum;
+    }
+
+    public void setScheduledInvestmentsNum(int scheduledInvestmentsNum) {
+        this.scheduledInvestmentsNum = scheduledInvestmentsNum;
+    }
+
+    public double getTotalUSDScheduled() {
+        return totalUSDScheduled;
+    }
+
+    public void setTotalUSDScheduled(double totalUSDScheduled) {
+        this.totalUSDScheduled = totalUSDScheduled;
     }
 
     public InvoiceIndexes getInvoiceIndex() {
@@ -51,14 +84,6 @@ public class FinsmartData {
 
     public void setTransactionsHashMap(HashMap<String, Transactions> transactionsHashMap) {
         this.transactionsHashMap = transactionsHashMap;
-    }
-
-    public ArrayList<Transactions> getCurrentDebtorFilter() {
-        return currentDebtorFilter;
-    }
-
-    public void setCurrentDebtorFilter(ArrayList<Transactions> currentDebtorFilter) {
-        this.currentDebtorFilter = currentDebtorFilter;
     }
 
     public FinancialTransactions getFinancialTransactions() {
@@ -85,68 +110,68 @@ public class FinsmartData {
         this.financialIndex = financialIndex;
     }
 
-    public double getSolesAmountAvailable() {
-        return solesAmountAvailable;
+    public double getTotalPENAvailable() {
+        return totalPENAvailable;
     }
 
-    public void setSolesAmountAvailable(double solesAmountAvailable) {
-        this.solesAmountAvailable = solesAmountAvailable;
+    public void setTotalPENAvailable(double totalPENAvailable) {
+        this.totalPENAvailable = totalPENAvailable;
     }
 
-    public double getDollarAmountAvailable() {
-        return dollarAmountAvailable;
+    public double getTotalUSDAvailable() {
+        return totalUSDAvailable;
     }
 
-    public void setDollarAmountAvailable(double dollarAmountAvailable) {
-        this.dollarAmountAvailable = dollarAmountAvailable;
+    public void setTotalUSDAvailable(double totalUSDAvailable) {
+        this.totalUSDAvailable = totalUSDAvailable;
     }
 
-    public double getSolesCurrentInvested() {
-        return solesCurrentInvested;
+    public double getTotalPENCurrentInvested() {
+        return totalPENCurrentInvested;
     }
 
-    public void setSolesCurrentInvested(double solesCurrentInvested) {
-        this.solesCurrentInvested = solesCurrentInvested;
+    public void setTotalPENCurrentInvested(double totalPENCurrentInvested) {
+        this.totalPENCurrentInvested = totalPENCurrentInvested;
     }
 
-    public double getDollarCurrentInvested() {
-        return dollarCurrentInvested;
+    public double getTotalUSDCurrentInvested() {
+        return totalUSDCurrentInvested;
     }
 
-    public void setDollarCurrentInvested(double dollarCurrentInvested) {
-        this.dollarCurrentInvested = dollarCurrentInvested;
+    public void setTotalUSDCurrentInvested(double totalUSDCurrentInvested) {
+        this.totalUSDCurrentInvested = totalUSDCurrentInvested;
     }
 
-    public double getSolesTotalDeposited() {
-        return solesTotalDeposited;
+    public double getTotalPENDeposited() {
+        return totalPENDeposited;
     }
 
-    public void setSolesTotalDeposited(double solesTotalDeposited) {
-        this.solesTotalDeposited = solesTotalDeposited;
+    public void setTotalPENDeposited(double totalPENDeposited) {
+        this.totalPENDeposited = totalPENDeposited;
     }
 
-    public double getDollarTotalDeposited() {
-        return dollarTotalDeposited;
+    public double getTotalUSDDeposited() {
+        return totalUSDDeposited;
     }
 
-    public void setDollarTotalDeposited(double dollarTotalDeposited) {
-        this.dollarTotalDeposited = dollarTotalDeposited;
+    public void setTotalUSDDeposited(double totalUSDDeposited) {
+        this.totalUSDDeposited = totalUSDDeposited;
     }
 
-    public double getSolesTotalProfit() {
-        return solesTotalProfit;
+    public double getTotalPENProfited() {
+        return totalPENProfited;
     }
 
-    public void setSolesTotalProfit(double solesTotalProfit) {
-        this.solesTotalProfit = solesTotalProfit;
+    public void setTotalPENProfited(double totalPENProfited) {
+        this.totalPENProfited = totalPENProfited;
     }
 
-    public double getDollarTotalProfit() {
-        return dollarTotalProfit;
+    public double getTotalUSDProfited() {
+        return totalUSDProfited;
     }
 
-    public void setDollarTotalProfit(double dollarTotalProfit) {
-        this.dollarTotalProfit = dollarTotalProfit;
+    public void setTotalUSDProfited(double totalUSDProfited) {
+        this.totalUSDProfited = totalUSDProfited;
     }
 
     public double getSolesProfitExpected() {
@@ -165,20 +190,20 @@ public class FinsmartData {
         this.dollarProfitExpected = dollarProfitExpected;
     }
 
-    public double getSolesRetentions() {
-        return solesRetentions;
+    public double getTotalPENRetentions() {
+        return totalPENRetentions;
     }
 
-    public void setSolesRetentions(double solesRetentions) {
-        this.solesRetentions = solesRetentions;
+    public void setTotalPENRetentions(double totalPENRetentions) {
+        this.totalPENRetentions = totalPENRetentions;
     }
 
-    public double getDollarRetentions() {
-        return dollarRetentions;
+    public double getTotalUSDRetentions() {
+        return totalUSDRetentions;
     }
 
-    public void setDollarRetentions(double dollarRetentions) {
-        this.dollarRetentions = dollarRetentions;
+    public void setTotalUSDRetentions(double totalUSDRetentions) {
+        this.totalUSDRetentions = totalUSDRetentions;
     }
 
     public double getSolesOnRisk() {

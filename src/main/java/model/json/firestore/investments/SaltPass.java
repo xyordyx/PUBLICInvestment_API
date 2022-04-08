@@ -1,3 +1,4 @@
+
 package model.json.firestore.investments;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,21 +7,21 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "stringValue"
+    "stringValue"
 })
-public class AdjustedAmount {
+public class SaltPass {
 
     @JsonProperty("stringValue")
-    private Double stringValue;
+    private String stringValue;
 
     @JsonProperty("stringValue")
-    public Double getStringValue() {
+    public String getStringValue() {
         return stringValue;
     }
 
     @JsonProperty("stringValue")
-    public void setDoubleValue(Double doubleValue) {
-        this.stringValue = doubleValue;
+    public void setStringValue(String stringValue) {
+        this.stringValue = stringValue;
     }
 
 }

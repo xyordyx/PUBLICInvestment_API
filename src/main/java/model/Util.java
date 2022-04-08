@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -11,18 +10,27 @@ import model.finsmartData.FinsmartData;
 import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
+import model.json.Opportunities;
 import model.json.Transactions;
 import model.json.firestore.investments.Document;
 import model.json.firestore.investments.Investments;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
 
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -154,16 +162,16 @@ public class Util {
     }
 
     public static FinsmartData resetData(FinsmartData data){
-        data.setSolesTotalDeposited(0);
-        data.setDollarTotalDeposited(0);
-        data.setSolesRetentions(0);
-        data.setDollarRetentions(0);
-        data.setDollarTotalProfit(0);
-        data.setSolesTotalProfit(0);
-        data.setDollarCurrentInvested(0);
-        data.setSolesCurrentInvested(0);
-        data.setSolesAmountAvailable(0);
-        data.setDollarAmountAvailable(0);
+        data.setTotalPENDeposited(0);
+        data.setTotalUSDDeposited(0);
+        data.setTotalPENRetentions(0);
+        data.setTotalUSDRetentions(0);
+        data.setTotalUSDProfited(0);
+        data.setTotalPENProfited(0);
+        data.setTotalUSDCurrentInvested(0);
+        data.setTotalPENCurrentInvested(0);
+        data.setTotalPENAvailable(0);
+        data.setTotalUSDAvailable(0);
         return data;
     }
 
@@ -198,10 +206,6 @@ public class Util {
             throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
             //return "Type definition error";
         }
-        catch (JsonProcessingException ex) {
-            throw new HttpMessageNotReadableException("JSON parse error: " + ex.getOriginalMessage(), ex);
-            //return "JSON parse error";
-        }
     }
 
     static Boolean isAutoManaged(String time){
@@ -227,5 +231,67 @@ public class Util {
             }
         }
         return response;
+    }
+
+    public static SecretKeySpec setKey(final String myKey) {
+        MessageDigest sha;
+        byte[] key;
+        try {
+            key = myKey.getBytes(StandardCharsets.UTF_8);
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16);
+            return new SecretKeySpec(key, "AES");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String encrypt(final String strToEncrypt, final String secret) {
+        try {
+            SecretKeySpec secretKey = setKey(secret);
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            return Base64.getEncoder()
+                    .encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            System.out.println("Error while encrypting: " + e);
+        }
+        return null;
+    }
+
+    public static String decrypt(final String strToDecrypt, final String secret) {
+        try {
+            SecretKeySpec secretKey = setKey(secret);
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return new String(cipher.doFinal(Base64.getDecoder()
+                    .decode(strToDecrypt)));
+        } catch (Exception e) {
+            System.out.println("Error while decrypting: " + e);
+        }
+        return null;
+    }
+
+    public static ArrayList<Opportunities> cleanOpportunities(ArrayList<Opportunities> opportunities,
+                                          ArrayList<Opportunities> lastOpportunities){
+        if(!lastOpportunities.isEmpty()){
+            boolean flag;
+            for(Opportunities opp: opportunities){
+                flag = true;
+                for(Opportunities lastOpp: lastOpportunities){
+                    if (lastOpp.getId().equals(opp.getId())) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    lastOpportunities.add(opp);
+                }
+                return lastOpportunities;
+            }
+        }
+        return opportunities;
     }
 }

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "stringValue"
 })
-public class Token {
+public class smartToken {
 
     @JsonProperty("stringValue")
     private String stringValue;

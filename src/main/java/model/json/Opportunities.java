@@ -1,10 +1,10 @@
 package model.json;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import model.json.firestore.investments.Evaluation;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Opportunities {
     private double tem;
@@ -12,41 +12,111 @@ public class Opportunities {
     private int v1IdGroup;
     private String _id;
     private List<PhysicalInvoices> physicalInvoices;
+    private Evaluation evaluation;
     private double availableBalanceAmount;
     private double availableBalancePercentage;
-    private String debtorCompanyName;
     private Debtor debtor;
+    private Boolean isConfirming;
+    private double advanceAmount;
+    private int toBeCollectedIn;
+    private String paymentDate;
+    private double tea;
+    private Boolean onSale;
+    private String createdAt;
 
-    @Override
-    public String toString() {
-        return "Opportunities{" +
-                "tem=" + tem +
-                ", currency='" + currency + '\'' +
-                ", v1IdGroup=" + v1IdGroup +
-                ", _id='" + _id + '\'' +
-                ", physicalInvoices=" + physicalInvoices +
-                ", availableBalanceAmount=" + availableBalanceAmount +
-                ", debtorCompanyName='" + debtorCompanyName + '\'' +
-                ", debtor=" + debtor +
-                '}';
-    }
-
-    @JsonCreator
-    public Opportunities(@JsonProperty("tem") double tem, @JsonProperty("currency") String currency,
-                         @JsonProperty("v1IdGroup") int v1IdGroup, @JsonProperty("_id") String _id,
-                         @JsonProperty("physicalInvoices")List<PhysicalInvoices> physicalInvoices,
-                         @JsonProperty("availableBalanceAmount") double availableBalanceAmount,
-                         @JsonProperty("debtorCompanyName") String debtorCompanyName, @JsonProperty("debtor") Debtor debtor,
-                         @JsonProperty("availableBalancePercentage")Double availableBalancePercentage) {
+    public Opportunities(double tem, String currency, int v1IdGroup, String _id, List<PhysicalInvoices> physicalInvoices,
+                         Evaluation evaluation, double availableBalanceAmount, double availableBalancePercentage,
+                         Debtor debtor, Boolean isConfirming, double advanceAmount, int toBeCollectedIn, String paymentDate,
+                         double tea, Boolean onSale, String createdAt) {
         this.tem = tem;
         this.currency = currency;
         this.v1IdGroup = v1IdGroup;
         this._id = _id;
         this.physicalInvoices = physicalInvoices;
+        this.evaluation = evaluation;
         this.availableBalanceAmount = availableBalanceAmount;
-        this.debtorCompanyName = debtorCompanyName;
-        this.debtor = debtor;
         this.availableBalancePercentage = availableBalancePercentage;
+        this.debtor = debtor;
+        this.isConfirming = isConfirming;
+        this.advanceAmount = advanceAmount;
+        this.toBeCollectedIn = toBeCollectedIn;
+        this.paymentDate = paymentDate;
+        this.tea = tea;
+        this.onSale = onSale;
+        this.createdAt = createdAt;
+    }
+
+
+    @JsonGetter("createdAt")
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @JsonGetter("evaluation")
+    public Evaluation getEvaluation() {
+        return evaluation;
+    }
+
+    public void setEvaluation(Evaluation evaluation) {
+        this.evaluation = evaluation;
+    }
+
+    @JsonGetter("isConfirming")
+    public Boolean getConfirming() {
+        return isConfirming;
+    }
+
+    public void setConfirming(Boolean confirming) {
+        isConfirming = confirming;
+    }
+
+    @JsonGetter("advanceAmount")
+    public double getAdvanceAmount() {
+        return advanceAmount;
+    }
+
+    public void setAdvanceAmount(double advanceAmount) {
+        this.advanceAmount = advanceAmount;
+    }
+
+    @JsonGetter("toBeCollectedIn")
+    public int getToBeCollectedIn() {
+        return toBeCollectedIn;
+    }
+
+    public void setToBeCollectedIn(int toBeCollectedIn) {
+        this.toBeCollectedIn = toBeCollectedIn;
+    }
+
+    @JsonGetter("paymentDate")
+    public String getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(String paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
+    @JsonGetter("tea")
+    public double getTea() {
+        return tea;
+    }
+
+    public void setTea(double tea) {
+        this.tea = tea;
+    }
+
+    @JsonGetter("onSale")
+    public Boolean getOnSale() {
+        return onSale;
+    }
+
+    public void setOnSale(Boolean onSale) {
+        this.onSale = onSale;
     }
 
     @JsonGetter("availableBalancePercentage")
@@ -65,15 +135,6 @@ public class Opportunities {
 
     public void setDebtor(Debtor debtor) {
         this.debtor = debtor;
-    }
-
-    @JsonGetter("debtorCompanyName")
-    public String getDebtorCompanyName() {
-        return debtorCompanyName;
-    }
-
-    public void setDebtorCompanyName(String debtorCompanyName) {
-        this.debtorCompanyName = debtorCompanyName;
     }
 
     @JsonGetter("tem")

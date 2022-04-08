@@ -1,8 +1,9 @@
-package model.firebase;
+package model.GoogleCloud;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.json.InvestmentData;
+import model.json.firestore.APPData.APPData;
 import model.json.firestore.instances.InstanceData;
 import model.json.firestore.instances.Instances;
 import model.json.firestore.investments.Document;
@@ -15,15 +16,95 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
 import java.io.IOException;
 
-public class CIGGoogleServices {
+
+public class CIGFireStore {
     private static final String authURL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
     private static final String firebaseKey = "AIzaSyAHixHDc0eWF3bzMabFSBcdCBYPZqnF7xY";
     private static final String fireDatabasesURL =
             "https://firestore.googleapis.com/v1/projects/hmrestapi-333720/databases/(default)/documents";
+    private static final String fireIntancesURL =
+            "https://appengine.googleapis.com/v1/apps/hmrestapi-333720/services/s1/versions/dev/instances";
 
+    //APPDATA METHODS
+    public boolean updateAPPData(String fireToken, APPData data, String userEmail){
+        CloseableHttpClient client = HttpClients.createDefault();
+        try {
+            HttpPatch httpPatch = new HttpPatch(fireDatabasesURL+"/APPData/"+userEmail+"?currentDocument.exists=true");
+            final String json = "{\n" +
+                    "  \"fields\": {\n" +
+                    "    \"userEmail\": {\n" +
+                    "      \"stringValue\": \""+userEmail+"\"\n" +
+                    "    },\n" +
+                    "    \"passwordCipher\": {\n" +
+                    "      \"stringValue\": \""+data.getPasswordCipher()+"\"\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+            StringEntity entity = new StringEntity(json);
+            httpPatch.setEntity(entity);
+            httpPatch.setHeader("Content-type", "application/json");
+            httpPatch.setHeader("Accept", "application/json");
+            httpPatch.setHeader("Authorization", "Bearer "+fireToken);
+
+            CloseableHttpResponse response;
+
+            response = client.execute(httpPatch);
+            if(response.getStatusLine().getStatusCode() == 200) {
+                return true;
+            }
+            System.out.println(EntityUtils.toString(response.getEntity()));
+            client.close();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean createAPPData(String fireToken, APPData data, String userEmail){
+        CloseableHttpClient client = HttpClients.createDefault();
+        try {
+            HttpPost httpPost = new HttpPost(fireDatabasesURL+"/APPData?documentId="+userEmail);
+            final String json= "{\n" +
+                    "  \"fields\": {\n" +
+                    "    \"userEmail\": {\n" +
+                    "      \"stringValue\": \""+userEmail+"\"\n" +
+                    "    },\n" +
+                    "    \"passwordCipher\": {\n" +
+                    "      \"stringValue\": \""+data.getPasswordCipher()+"\"\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+            if (getStringEntity(fireToken, client, httpPost, json)) return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return updateAPPData(fireToken,data, userEmail);
+    }
+
+    public boolean getUserDataById(String fireToken, String userEmail){
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        String stringResponse;
+        HttpGet getRequest = new HttpGet(fireDatabasesURL+"/APPData/"+userEmail);
+
+        //Set the API media type in http accept header
+        getRequest.addHeader("Accept", "application/json");
+        getRequest.addHeader("Content-Type", "application/json");
+        getRequest.addHeader("Authorization", "Bearer "+fireToken);
+
+        //Send the request
+        try {
+            HttpResponse response = httpClient.execute(getRequest);
+            return response.getStatusLine().getStatusCode() != 404;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    //INVESTMENTS METHODS
     public Investments[] getInvestmentsByCompleted(String fireToken, Boolean isCompleted){
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse;
@@ -85,7 +166,7 @@ public class CIGGoogleServices {
         return null;
     }
 
-    public boolean createInvestment(String fireToken, InvestmentData investment){
+    public boolean createFireInvestment(String fireToken, InvestmentData investment){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(fireDatabasesURL+"/Investments?documentId="+investment.getInvoiceId());
@@ -96,7 +177,7 @@ public class CIGGoogleServices {
         return false;
     }
 
-    public boolean updateInvestment(String fireToken, InvestmentData investment){
+    public boolean updateFireInvestment(String fireToken, InvestmentData investment){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
             HttpPatch httpPatch = new HttpPatch(
@@ -106,6 +187,7 @@ public class CIGGoogleServices {
             httpPatch.setHeader("Accept", "application/json");
             httpPatch.setHeader("Content-type", "application/json");
             httpPatch.setHeader("Authorization", "Bearer "+fireToken);
+            Double temp = investment.getAdjustedAmount();
 
             CloseableHttpResponse response;
             response = client.execute(httpPatch);
@@ -120,7 +202,7 @@ public class CIGGoogleServices {
         return false;
     }
 
-    public boolean deleteInvestment(String fireToken, String invoiceId){
+    public boolean deleteFireInvestment(String fireToken, String invoiceId){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
             HttpDelete httpDelete = new HttpDelete(fireDatabasesURL+"/Investments/"+invoiceId);
@@ -140,10 +222,11 @@ public class CIGGoogleServices {
         return false;
     }
 
+    //INSTANCES METHODS
     public model.json.firestore.instances.Document getInstanceById(String fireToken, String instanceId){
         HttpClient httpClient = HttpClientBuilder.create().build();
         String stringResponse;
-        HttpGet getRequest = new HttpGet(fireDatabasesURL+"/Instances/"+instanceId);
+        HttpGet getRequest = new HttpGet(fireDatabasesURL+"/Instance/"+instanceId);
 
         //Set the API media type in http accept header
         getRequest.addHeader("Accept", "application/json");
@@ -163,10 +246,10 @@ public class CIGGoogleServices {
         return null;
     }
 
-    public boolean createInstance(String fireToken, InstanceData instance){
+    public void createFireInstance(String fireToken, InstanceData instance){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
-            HttpPost httpPost = new HttpPost(fireDatabasesURL+"/Instances?documentId="+instance.getId());
+            HttpPost httpPost = new HttpPost(fireDatabasesURL+"/Instance?documentId="+instance.getId());
             final String json = "{\n" +
                     "  \"fields\": {\n" +
                     "    \"id\": {\n" +
@@ -177,17 +260,16 @@ public class CIGGoogleServices {
                     "    }\n" +
                     "  }\n" +
                     "}";
-            if (getStringEntity(fireToken, client, httpPost, json)) return true;
+            getStringEntity(fireToken, client, httpPost, json);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    public boolean updateInstance(String fireToken, model.json.firestore.instances.Document instance){
+    public void updateFireInstance(String fireToken, model.json.firestore.instances.Document instance){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
-            HttpPatch httpPatch = new HttpPatch(fireDatabasesURL+"/Instances/"+
+            HttpPatch httpPatch = new HttpPatch(fireDatabasesURL+"/Instance/"+
                     instance.getFields().getId().getStringValue()+"?currentDocument.exists=true");
             final String json = "{\n" +
                     "  \"fields\": {\n" +
@@ -204,25 +286,18 @@ public class CIGGoogleServices {
             httpPatch.setHeader("Content-type", "application/json");
             httpPatch.setHeader("Accept", "application/json");
             httpPatch.setHeader("Authorization", "Bearer "+fireToken);
+            client.execute(httpPatch);
 
-            CloseableHttpResponse response;
-
-            response = client.execute(httpPatch);
-            if(response.getStatusLine().getStatusCode() == 200) {
-                return true;
-            }
             client.close();
-            return false;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    public boolean deleteInstance(String fireToken, String instanceId){
+    public boolean deleteFireInstance(String fireToken, String instanceId){
         CloseableHttpClient client = HttpClients.createDefault();
         try {
-            HttpDelete httpDelete = new HttpDelete(fireDatabasesURL+"/Instances/"+instanceId);
+            HttpDelete httpDelete = new HttpDelete(fireDatabasesURL+"/Instance/"+instanceId);
             httpDelete.setHeader("Accept", "application/json");
             httpDelete.setHeader("Content-type", "application/json");
             httpDelete.setHeader("Authorization", "Bearer "+fireToken);
@@ -255,7 +330,7 @@ public class CIGGoogleServices {
             stringResponse = EntityUtils.toString(response.getEntity());
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            if(collectionName.equals("Instances")){
+            if(collectionName.equals("Instance")){
                 return objectMapper.readValue(stringResponse, Instances.class);
             }else if(collectionName.equals("Investments")){
                 return objectMapper.readValue(stringResponse, Investments.class);
@@ -290,6 +365,28 @@ public class CIGGoogleServices {
         return null;
     }
 
+    public void getAllCloudInstances(String fireToken){
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        String stringResponse;
+        HttpGet getRequest = new HttpGet(fireIntancesURL+"?key="+firebaseKey);
+
+        //Set the API media type in http accept header
+        getRequest.addHeader("Accept", "application/json");
+        getRequest.addHeader("Content-Type", "application/json");
+        getRequest.addHeader("Authorization", "Bearer "+fireToken);
+
+        //Send the request
+        try {
+            HttpResponse response = httpClient.execute(getRequest);
+            EntityUtils.toString(response.getEntity());
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     boolean getStringEntity(String fireToken, CloseableHttpClient client, HttpPost httpPost, String json) throws IOException {
         StringEntity entity = new StringEntity(json);
         httpPost.setEntity(entity);
@@ -299,10 +396,10 @@ public class CIGGoogleServices {
         CloseableHttpResponse response;
 
         response = client.execute(httpPost);
-        String stringResponse = EntityUtils.toString(response.getEntity());
         if(response.getStatusLine().getStatusCode() == 200) {
             return true;
         }
+        //System.out.println(EntityUtils.toString(response.getEntity()));
         client.close();
         return false;
     }
@@ -311,7 +408,7 @@ public class CIGGoogleServices {
         return "{\n" +
                 "  \"fields\": {\n" +
                 "    \"adjustedAmount\": {\n" +
-                "      \"integerValue\": "+investment.getAdjustedAmount()+"\n" +
+                "      \"stringValue\": \""+investment.getAdjustedAmount()+"\"\n" +
                 "    },\n" +
                 "    \"autoAdjusted\": {\n" +
                 "      \"booleanValue\": "+investment.isAutoAdjusted()+"\n" +
@@ -340,8 +437,11 @@ public class CIGGoogleServices {
                 "    \"time\": {\n" +
                 "      \"stringValue\": \""+investment.getTime()+"\"\n" +
                 "    },\n" +
-                "    \"token\": {\n" +
-                "      \"stringValue\": \""+investment.getToken()+"\"\n" +
+                "    \"smartToken\": {\n" +
+                "      \"stringValue\": \""+investment.getSmartToken()+"\"\n" +
+                "    },\n" +
+                "    \"saltPass\": {\n" +
+                "      \"stringValue\": \""+investment.getSaltPass()+"\"\n" +
                 "    },\n" +
                 "    \"amount\": {\n" +
                 "      \"doubleValue\": "+investment.getAmount()+"\n" +
@@ -349,4 +449,6 @@ public class CIGGoogleServices {
                 "  }\n" +
                 "}";
     }
+
+
 }

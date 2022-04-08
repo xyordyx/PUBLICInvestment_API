@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FinsmartUtil {
@@ -28,7 +29,7 @@ public class FinsmartUtil {
         ResponseJSON responseJSON = null;
         parameters = generateJSONInvest(amount, investment.getCurrency(), investment.getInvoiceId());
         while(responseJSON == null){
-            responseJSON = CIGFinsmart.executeInvestment1(parameters,investment.getToken());
+            responseJSON = CIGFinsmart.executeInvestment1(parameters,investment.getSmartToken());
         }
         return responseJSON;
     }
@@ -92,5 +93,42 @@ public class FinsmartUtil {
             response.append(responseLine.trim());
         }
         return response;
+    }
+
+    public static FinsmartData processToBeAmount(List<InvestmentData> investmentData, FinsmartData data){
+        double tempPEN = 0.00;
+        double tempUSD = 0.00;
+        for(InvestmentData inv: investmentData){
+            if(inv.getCurrency().equals("pen")){
+                tempPEN = tempPEN + inv.getAmount();
+            }else{
+                tempUSD = tempUSD + inv.getAmount();
+            }
+        }
+        data.setTotalPENScheduled(tempPEN);
+        data.setTotalUSDScheduled(tempUSD);
+        return data;
+    }
+
+    public static ArrayList<Opportunities> opportunitiesNoScheduled(ArrayList<Opportunities> opportunities,
+            List<InvestmentData> investmentData){
+        ArrayList<Opportunities> response = new ArrayList<>();
+        if(!investmentData.isEmpty()){
+            for(Opportunities opp: opportunities){
+                boolean flag = true;
+                for(InvestmentData inv: investmentData){
+                    if (opp.getId().equals(inv.getInvoiceId())) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    response.add(opp);
+                }
+            }
+            return response;
+        }else{
+            return opportunities;
+        }
     }
 }
