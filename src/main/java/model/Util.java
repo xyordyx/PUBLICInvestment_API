@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.google.gson.Gson;
+import model.GoogleCloud.CIGFireStore;
 import model.finsmartData.FinsmartData;
 import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
 import model.json.Opportunities;
 import model.json.Transactions;
+import model.json.firestore.instances.InstanceData;
 import model.json.firestore.investments.Document;
 import model.json.firestore.investments.Investments;
 import org.apache.http.HttpResponse;
@@ -24,10 +27,13 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -209,8 +215,8 @@ public class Util {
     }
 
     static Boolean isAutoManaged(String time){
-        //Asking for 5 minutes before execution time
-        return 300000 <= timesDiff(time);
+        //Asking for 1.5 minutes before execution time
+        return 90000 <= timesDiff(time);
     }
 
     public static List<InvestmentData> getListInvestmentData(Investments investments){
@@ -233,6 +239,18 @@ public class Util {
         return response;
     }
 
+    public static List<InvestmentData> getListInvestmentFromList(Investments [] investments, String currentState){
+        List<InvestmentData> response = new ArrayList<>();
+        for(Investments inv: investments){
+            if(inv.getDocument() != null){
+                if(inv.getDocument().getFields().getCurrentState().getStringValue().equals(currentState)){
+                    response.add(new InvestmentData(inv.getDocument()));
+                }
+            }
+        }
+        return response;
+    }
+
     public static SecretKeySpec setKey(final String myKey) {
         MessageDigest sha;
         byte[] key;
@@ -248,50 +266,20 @@ public class Util {
         return null;
     }
 
-    public static String encrypt(final String strToEncrypt, final String secret) {
+    public static Opportunities[] loadJSONFromFile(){
         try {
-            SecretKeySpec secretKey = setKey(secret);
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return Base64.getEncoder()
-                    .encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception e) {
-            System.out.println("Error while encrypting: " + e);
+            Gson gson = new Gson();
+            Reader reader = Files.newBufferedReader(Paths.get("src/main/resources/static/opps.json"));
+            Opportunities[] opportunities = gson.fromJson(reader, Opportunities[].class);
+            reader.close();
+            return opportunities;
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return null;
     }
 
-    public static String decrypt(final String strToDecrypt, final String secret) {
-        try {
-            SecretKeySpec secretKey = setKey(secret);
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return new String(cipher.doFinal(Base64.getDecoder()
-                    .decode(strToDecrypt)));
-        } catch (Exception e) {
-            System.out.println("Error while decrypting: " + e);
-        }
-        return null;
-    }
+    public static void postToExecutor(){
 
-    public static ArrayList<Opportunities> cleanOpportunities(ArrayList<Opportunities> opportunities,
-                                          ArrayList<Opportunities> lastOpportunities){
-        if(!lastOpportunities.isEmpty()){
-            boolean flag;
-            for(Opportunities opp: opportunities){
-                flag = true;
-                for(Opportunities lastOpp: lastOpportunities){
-                    if (lastOpp.getId().equals(opp.getId())) {
-                        flag = false;
-                        break;
-                    }
-                }
-                if(flag){
-                    lastOpportunities.add(opp);
-                }
-                return lastOpportunities;
-            }
-        }
-        return opportunities;
     }
 }

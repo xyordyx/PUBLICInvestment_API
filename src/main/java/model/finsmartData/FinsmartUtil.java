@@ -60,6 +60,7 @@ public class FinsmartUtil {
                 investment.setMessage(responseJSON.getMessage());
             }
         }
+        investment.setCompleted(true);
         return investment;
     }
 
@@ -99,10 +100,12 @@ public class FinsmartUtil {
         double tempPEN = 0.00;
         double tempUSD = 0.00;
         for(InvestmentData inv: investmentData){
-            if(inv.getCurrency().equals("pen")){
-                tempPEN = tempPEN + inv.getAmount();
-            }else{
-                tempUSD = tempUSD + inv.getAmount();
+            if(!inv.isCompleted()){
+                if(inv.getCurrency().equals("pen")){
+                    tempPEN = tempPEN + inv.getAmount();
+                }else{
+                    tempUSD = tempUSD + inv.getAmount();
+                }
             }
         }
         data.setTotalPENScheduled(tempPEN);

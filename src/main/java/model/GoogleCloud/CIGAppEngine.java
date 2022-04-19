@@ -20,7 +20,7 @@ public class CIGAppEngine {
     private static final String appEngineURL =
             "https://appengine.googleapis.com/v1beta/apps/hmrestapi-333720/services/s1/versions/dev/instances";
 
-    public Instances getCurrentInstances(String token){
+    public static Instances getCurrentInstances(String token){
         HttpClient httpClient = HttpClientBuilder.create().build();
         String stringResponse;
         HttpGet getRequest = new HttpGet(appEngineURL);
@@ -33,10 +33,12 @@ public class CIGAppEngine {
         //Send the request
         try {
             HttpResponse response = httpClient.execute(getRequest);
-            stringResponse = EntityUtils.toString(response.getEntity());
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            return objectMapper.readValue(stringResponse, Instances.class);
+            if(response.getStatusLine().getStatusCode() == 200) {
+                stringResponse = EntityUtils.toString(response.getEntity());
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                return objectMapper.readValue(stringResponse, Instances.class);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -8,11 +8,15 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import model.finsmartData.FinsmartUtil;
 import model.json.*;
+import model.json.firestore.APPData.APPData;
+import model.json.firestore.instances.InstanceData;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -20,6 +24,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import javax.sound.midi.SysexMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static model.Util.getTime;
@@ -43,29 +49,36 @@ public class CIGFinsmart {
 
     private static final String appEnginePath="hmrestapi-333720.uk.r.appspot.com";
 
-    public Boolean scheduleInvestment(InvestmentData investment, String url) {
+    public Boolean scheduleInvestment(InvestmentData investment) {
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse;
+        int instance = new Random().nextInt(19);
+        String scheduleURL = investment.getInvoiceId() + "-dot-"+ instance + "-dot-s1-dot-";
+
         try {
-            //HttpPost httpPost = new HttpPost("https://"+url+appEnginePath+"scheduleinvestment");
-            HttpPost httpPost = new HttpPost("http://localhost:8080/scheduleinvestment");
+            HttpPost httpPost = new HttpPost("https://"+scheduleURL+appEnginePath+"/scheduleinvestment");
+            //HttpPost httpPost = new HttpPost("http://localhost:8080/scheduleinvestment");
             final String json = "{" +
                     "\"invoiceId\":\""+investment.getInvoiceId()+"\"," +
                     "\"time\":\""+investment.getTime()+"\"," +
                     "\"amount\":\""+investment.getAmount()+"\"," +
                     "\"currency\":\""+investment.getCurrency()+"\"," +
-                    "\"token\":\""+investment.getSmartToken()+"\"," +
+                    "\"smartToken\":\""+investment.getSmartToken()+"\"," +
                     "\"message\":\""+investment.getMessage()+"\"," +
                     "\"status\":\""+investment.isStatus()+"\"," +
                     "\"currentState\":\""+investment.getCurrentState()+"\"," +
+                    "\"instanceVersion\":\""+instance+"\"," +
+                    "\"adjustedAmount\":\""+investment.getAdjustedAmount()+"\"," +
+                    "\"autoAdjusted\":\""+investment.isAutoAdjusted()+"\"," +
+                    "\"completed\":\""+investment.isCompleted()+"\"," +
+                    "\"userId\":\""+investment.getUserId()+"\"," +
                     "\"debtorName\":\""+investment.getDebtorName()+
                     "\"}";
-            StringEntity entity = new StringEntity(json);
+            StringEntity entity = new StringEntity(json, "UTF-8");
             httpPost.setEntity(entity);
             httpPost.setHeader("Content-type", "application/json");
 
             CloseableHttpResponse response;
-
             response = client.execute(httpPost);
             if(response.getStatusLine().getStatusCode() == 200) {
                 stringResponse = EntityUtils.toString(response.getEntity());
@@ -78,7 +91,7 @@ public class CIGFinsmart {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     public static ResponseJSON executeInvestment1(String urlParameters, String token) {
@@ -201,12 +214,13 @@ public class CIGFinsmart {
         return invoiceTransactions;
     }
 
-    /*public LoginJSON getAuthentications(String email, String passd) {
+    public static LoginJSON getAuthentications(APPData userData) {
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse = null;
         try {
             HttpPost httpPost = new HttpPost(smartURLv1+authenticationPath);
-            final String json = "{\"email\":\""+email+"\",\"actualPassword\":\""+passd+"\"}";
+            final String json = "{\"email\":\""+userData.getFields().getUserEmail().getStringValue()
+                    +"\",\"actualPassword\":\""+userData.getFields().getPasswordCipher().getStringValue()+"\"}";
             StringEntity entity = new StringEntity(json);
             httpPost.setEntity(entity);
             httpPost.setHeader("Content-type", "application/json");
@@ -226,7 +240,7 @@ public class CIGFinsmart {
             e.printStackTrace();
         }
         return null;
-    }*/
+    }
 
     public static ArrayList<Opportunities> getOpportunitiesJSON(String token) {
         URL url;

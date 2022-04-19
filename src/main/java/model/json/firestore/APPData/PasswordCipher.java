@@ -1,15 +1,15 @@
+package model.json.firestore.APPData;
 
-package model.json.firestore.investments;
-
+import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "stringValue"
+        "stringValue"
 })
-public class SaltPass {
+public class PasswordCipher {
 
     @JsonProperty("stringValue")
     private String stringValue;

@@ -13,32 +13,22 @@ public class InvestmentData {
     private boolean autoAdjusted;
     private String debtorName;
     private String smartToken;
-    private String saltPass;
 
     private String message;
     private boolean status;
     private boolean completed;
     private String currentState;
-
-    public InvestmentData() {
-        this.amount = 0.00;
-        this.adjustedAmount = 0.00;
-        this.currency = "";
-        this.invoiceId = "";
-        this.time = "";
-        this.autoAdjusted = false;
-        this.debtorName = "";
-        this.smartToken = "";
-        this.message = "";
-        this.status = false;
-        this.completed = false;
-        this.currentState = "";
-        this.saltPass = "";
-    }
+    private int instanceVersion;
+    private String instanceId;
+    private String userId;
 
     @Override
     public int hashCode() {
         return Objects.hash(getInvoiceId());
+    }
+
+    public InvestmentData(){
+
     }
 
     public InvestmentData(Document document){
@@ -58,15 +48,31 @@ public class InvestmentData {
         this.status = document.getFields().getStatus().getBooleanValue();
         this.completed = document.getFields().getCompleted().getBooleanValue();
         this.currentState = document.getFields().getCurrentState().getStringValue();
-        this.saltPass = document.getFields().getSaltPass().getStringValue();
+        this.userId = document.getFields().getUserId().getStringValue();
     }
 
-    public String getSaltPass() {
-        return saltPass;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setSaltPass(String saltPass) {
-        this.saltPass = saltPass;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getInstanceVersion() {
+        return instanceVersion;
+    }
+
+    public void setInstanceVersion(int instanceVersion) {
+        this.instanceVersion = instanceVersion;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     public Double getAdjustedAmount() {

@@ -18,7 +18,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "currency",
     "status",
     "invoiceId",
-    "autoAdjusted"
+    "autoAdjusted",
+        "instanceId",
+        "userId"
 })
 public class Fields {
 
@@ -46,17 +48,29 @@ public class Fields {
     private InvoiceId invoiceId;
     @JsonProperty("autoAdjusted")
     private AutoAdjusted autoAdjusted;
-    @JsonProperty("saltPass")
-    private SaltPass saltPass;
+    @JsonProperty("instanceId")
+    private InstanceId instanceId;
+    @JsonProperty("userId")
+    private UserId userId;
 
-    @JsonProperty("saltPass")
-    public SaltPass getSaltPass() {
-        return saltPass;
+    @JsonProperty("userId")
+    public UserId getUserId() {
+        return userId;
     }
 
-    @JsonProperty("saltPass")
-    public void setSaltPass(SaltPass saltPass) {
-        this.saltPass = saltPass;
+    @JsonProperty("userId")
+    public void setUserId(UserId userId) {
+        this.userId = userId;
+    }
+
+    @JsonProperty("instanceId")
+    public InstanceId getInstanceId() {
+        return instanceId;
+    }
+
+    @JsonProperty("instanceId")
+    public void setInstanceId(InstanceId instanceId) {
+        this.instanceId = instanceId;
     }
 
     @JsonProperty("debtorName")

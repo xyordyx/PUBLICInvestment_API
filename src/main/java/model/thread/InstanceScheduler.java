@@ -1,15 +1,17 @@
 package model.thread;
 
+import model.GoogleCloud.CIGAppEngine;
 import model.finsmartData.FinsmartUtil;
 import model.GoogleCloud.CIGFireStore;
 import model.json.InvestmentData;
 import model.json.ResponseJSON;
-import model.json.firestore.investments.Document;
+
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static model.Util.getTime;
+import static model.Util.timesDiff;
 
 public class InstanceScheduler implements Runnable{
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -39,12 +41,10 @@ public class InstanceScheduler implements Runnable{
         try {
             if(future.get() != null){
                 CIGFireStore cig = new CIGFireStore();
-                Document document = cig.getInvestmentsById(googleToken,investmentData.getInvoiceId());
-                if(document != null){
-                    InvestmentData tempData = new InvestmentData(document);
-                    tempData.setCurrentState("Processed");
-                    cig.updateFireInvestment(googleToken,tempData);
-                }
+                InvestmentData tempData = future.get();
+                tempData.setCurrentState("Processed");
+                cig.updateFireInvestment(googleToken,tempData);
+                CIGAppEngine.deleteAppEngineInstance(this.googleToken,investmentData.getInstanceId());
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -58,30 +58,29 @@ public class InstanceScheduler implements Runnable{
     Callable<InvestmentData> callable = new Callable<>() {
         @Override
         public InvestmentData call()  {
-            ResponseJSON responseJSON = new ResponseJSON(true,"");
+            ResponseJSON responseJSON;
             double actualAmount;
             System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName() +" - scheduled - " + getTime());
             try {
-                //TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getTime())-600);
-                TimeUnit.MILLISECONDS.sleep(100000);
+                TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getTime())-250);
             } catch (InterruptedException e) {
                 System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()+" - interrupted - " + getTime());
                 flag = false;
                 //Thread.currentThread().interrupt();
             }
             if(flag){
-                //responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
+                responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
                 actualAmount = investmentData.getAmount();
                 //INVOICE NOT PUBLISHED YET
                 while (responseJSON.getMessage().replace('"', ' ').equals(notPublished) &&
                         !Thread.currentThread().isInterrupted()) {
-                    //responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
+                    responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);
                 }
                 //INVOICE AMOUNT IS LESS THAN DESIRED AMOUNT
                 if (responseJSON.getMessage().replace('"', ' ').equals(amountBigger)
                         && !Thread.currentThread().isInterrupted()) {
                     actualAmount = FinsmartUtil.updateOpportunity(investmentData.getSmartToken(), investmentData.getInvoiceId());
-                    //responseJSON = FinsmartUtil.postToFinSmartInstance(actualAmount, investmentData);
+                    responseJSON = FinsmartUtil.postToFinSmartInstance(actualAmount, investmentData);
                     FinsmartUtil.updateInvestment(investmentData, responseJSON, 4, actualAmount);
                 }
                 //INVESTMENT COMPLETED
@@ -91,7 +90,6 @@ public class InstanceScheduler implements Runnable{
                 System.out.println(": "+Thread.currentThread().getName() +
                         investmentData.getDebtorName() + " - " + "STATUS: " + investmentData.isStatus()
                         + " MSG:" + investmentData.getMessage() + " Amount:" + actualAmount+" - " + getTime());
-                investmentData.setCompleted(true);
             }
             return investmentData;
         }
