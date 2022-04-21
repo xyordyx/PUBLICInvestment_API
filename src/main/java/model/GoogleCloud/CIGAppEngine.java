@@ -18,7 +18,7 @@ import java.io.IOException;
 public class CIGAppEngine {
 
     private static final String appEngineURL =
-            "https://appengine.googleapis.com/v1beta/apps/hmrestapi-333720/services/s1/versions/dev/instances";
+            "https://appengine.googleapis.com/v1beta/apps/hmnorth/services/default/versions/20220420t181521/instances";
 
     public static Instances getCurrentInstances(String token){
         HttpClient httpClient = HttpClientBuilder.create().build();

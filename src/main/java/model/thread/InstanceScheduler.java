@@ -60,13 +60,16 @@ public class InstanceScheduler implements Runnable{
         public InvestmentData call()  {
             ResponseJSON responseJSON;
             double actualAmount;
-            System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName() +" - scheduled - " + getTime());
             try {
-                TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getTime())-250);
+                if(!investmentData.isOnSale()){
+                    System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()
+                            +" - scheduled - " + getTime());
+                    TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getOnSaleSlot())-250);
+                }
             } catch (InterruptedException e) {
-                System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()+" - interrupted - " + getTime());
+                System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()
+                        +" - interrupted - " + getTime());
                 flag = false;
-                //Thread.currentThread().interrupt();
             }
             if(flag){
                 responseJSON = FinsmartUtil.postToFinSmartInstance(investmentData.getAmount(),investmentData);

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import model.json.firestore.investments.Evaluation;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Opportunities {
     private double tem;
@@ -23,11 +22,12 @@ public class Opportunities {
     private double tea;
     private Boolean onSale;
     private String createdAt;
+    private int onSaleSlot;
 
     public Opportunities(double tem, String currency, int v1IdGroup, String _id, List<PhysicalInvoices> physicalInvoices,
                          Evaluation evaluation, double availableBalanceAmount, double availableBalancePercentage,
                          Debtor debtor, Boolean isConfirming, double advanceAmount, int toBeCollectedIn, String paymentDate,
-                         double tea, Boolean onSale, String createdAt) {
+                         double tea, Boolean onSale, String createdAt, int onSaleSlot) {
         this.tem = tem;
         this.currency = currency;
         this.v1IdGroup = v1IdGroup;
@@ -44,8 +44,27 @@ public class Opportunities {
         this.tea = tea;
         this.onSale = onSale;
         this.createdAt = createdAt;
+        this.onSaleSlot = onSaleSlot;
     }
 
+    @JsonGetter("onSale")
+    public Boolean getOnSale() {
+        return onSale;
+    }
+    @JsonGetter("onSale")
+    public void setOnSale(Boolean onSale) {
+        this.onSale = onSale;
+    }
+
+    @JsonGetter("onSaleSlot")
+    public int getOnSaleSlot() {
+        return onSaleSlot;
+    }
+
+    @JsonGetter("onSaleSlot")
+    public void setOnSaleSlot(int onSaleSlot) {
+        this.onSaleSlot = onSaleSlot;
+    }
 
     @JsonGetter("createdAt")
     public String getCreatedAt() {
@@ -108,15 +127,6 @@ public class Opportunities {
 
     public void setTea(double tea) {
         this.tea = tea;
-    }
-
-    @JsonGetter("onSale")
-    public Boolean getOnSale() {
-        return onSale;
-    }
-
-    public void setOnSale(Boolean onSale) {
-        this.onSale = onSale;
     }
 
     @JsonGetter("availableBalancePercentage")

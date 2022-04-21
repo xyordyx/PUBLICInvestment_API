@@ -18,8 +18,7 @@ public class GoogleCloudAuthenticator {
     public static String getGoogleCloudToken() {
         GoogleCredentials credentials;
         try {
-            //GoogleCredentials credentials = AppEngineCredentials.getApplicationDefault();
-            FileInputStream fileInputStream = new FileInputStream("src/main/resources/static/hmrestapi-333720-7dad7f1da042.json");
+            FileInputStream fileInputStream = new FileInputStream("src/main/resources/static/hmnorth-f7ad3209536d.json");
             credentials = ServiceAccountCredentials.fromStream(fileInputStream).createScoped(ADMIN_SCOPES);
             return credentials.refreshAccessToken().getTokenValue();
         } catch (IOException e) {

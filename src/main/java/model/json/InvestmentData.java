@@ -13,6 +13,8 @@ public class InvestmentData {
     private boolean autoAdjusted;
     private String debtorName;
     private String smartToken;
+    private int onSaleSlot;
+    private boolean onSale;
 
     private String message;
     private boolean status;
@@ -35,8 +37,8 @@ public class InvestmentData {
         if(document.getFields().getAmount().getDoubleValue() != null){
             this.amount = document.getFields().getAmount().getDoubleValue();
         }else this.amount = 0.00;
-        if(document.getFields().getAdjustedAmount().getStringValue() != null){
-            this.adjustedAmount = document.getFields().getAdjustedAmount().getStringValue();
+        if(document.getFields().getAdjustedAmount().getDoubleValue() != null){
+            this.adjustedAmount = document.getFields().getAdjustedAmount().getDoubleValue();
         }else this.adjustedAmount = 0.00;
         this.currency = document.getFields().getCurrency().getStringValue();
         this.invoiceId = document.getFields().getInvoiceId().getStringValue();
@@ -49,6 +51,24 @@ public class InvestmentData {
         this.completed = document.getFields().getCompleted().getBooleanValue();
         this.currentState = document.getFields().getCurrentState().getStringValue();
         this.userId = document.getFields().getUserId().getStringValue();
+        this.onSale = document.getFields().getOnSale().getBooleanValue();
+        this.onSaleSlot = (int)document.getFields().getOnSaleSlot().getDoubleValue();
+    }
+
+    public int getOnSaleSlot() {
+        return onSaleSlot;
+    }
+
+    public void setOnSaleSlot(int onSaleSlot) {
+        this.onSaleSlot = onSaleSlot;
+    }
+
+    public boolean isOnSale() {
+        return onSale;
+    }
+
+    public void setOnSale(boolean onSale) {
+        this.onSale = onSale;
     }
 
     public String getUserId() {

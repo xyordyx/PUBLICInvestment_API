@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.json.InvestmentData;
 import model.json.firestore.APPData.APPData;
-import model.json.firestore.instances.InstanceData;
 import model.json.firestore.instances.Instances;
 import model.json.firestore.investments.Document;
 import model.json.firestore.investments.Investments;
@@ -18,14 +17,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 
-
 public class CIGFireStore {
     private static final String authURL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
-    private static final String firebaseKey = "AIzaSyAHixHDc0eWF3bzMabFSBcdCBYPZqnF7xY";
+    private static final String firebaseKey = "AIzaSyAGw55i3fjlUCIVmAKbAiARf4SDba8ggSs";
     private static final String fireDatabasesURL =
-            "https://firestore.googleapis.com/v1/projects/hmrestapi-333720/databases/(default)/documents";
+            "https://firestore.googleapis.com/v1/projects/hmnorth/databases/(default)/documents";
     private static final String fireIntancesURL =
-            "https://appengine.googleapis.com/v1/apps/hmrestapi-333720/services/s1/versions/dev/instances";
+            "https://appengine.googleapis.com/v1/apps/hmnorth/services/s1/versions/dev/instances";
 
     //APPDATA METHODS
     public boolean updateAPPData(String fireToken, String passwordCipher, String userEmail){
@@ -378,6 +376,12 @@ public class CIGFireStore {
                 "    },\n" +
                 "    \"instanceVersion\": {\n" +
                 "      \"doubleValue\": \""+investment.getInstanceVersion()+"\"\n" +
+                "    },\n" +
+                "    \"onSale\": {\n" +
+                "      \"booleanValue\": \""+investment.isOnSale()+"\"\n" +
+                "    },\n" +
+                "    \"onSaleSlot\": {\n" +
+                "      \"integerValue\": \""+investment.getOnSaleSlot()+"\"\n" +
                 "    },\n" +
                 "    \"amount\": {\n" +
                 "      \"doubleValue\": "+investment.getAmount()+"\n" +

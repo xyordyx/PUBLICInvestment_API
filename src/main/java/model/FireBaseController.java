@@ -4,9 +4,6 @@ import model.GoogleCloud.CIGAppEngine;
 import model.GoogleCloud.CIGFireStore;
 import model.GoogleCloud.GoogleCloudAuthenticator;
 import model.json.InvestmentData;
-import model.json.firestore.APPData.APPData;
-import model.json.firestore.APPData.UserEmail;
-import model.json.firestore.instances.InstanceData;
 import model.json.firestore.investments.Investments;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +23,7 @@ public class FireBaseController {
         CIGFireStore cig = new CIGFireStore();
         investment.setCompleted(false);
         String googleToken;
-        if (Util.isAutoManaged(investment.getTime())) {
+        if (Util.isAutoManaged(investment.getTime()) || !investment.isOnSale()) {
             investment.setCurrentState("DB");
             googleToken = GoogleCloudAuthenticator.getGoogleCloudToken();
             if(googleToken != null) return new ResponseEntity<>(cig.createFireInvestment(googleToken, investment), HttpStatus.OK);
@@ -115,6 +112,7 @@ public class FireBaseController {
         CIGFireStore cig = new CIGFireStore();
         String token = GoogleCloudAuthenticator.getGoogleCloudToken();
         if(token != null){
+            Investments[] a = cig.getInvestmentsByCompleted(token,isCompleted);
             return ResponseEntity.ok(new ArrayList<>
                     (Util.getListInvestmentFromList(cig.getInvestmentsByCompleted(token,isCompleted))));
         }

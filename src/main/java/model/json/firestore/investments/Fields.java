@@ -20,7 +20,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "invoiceId",
     "autoAdjusted",
         "instanceId",
-        "userId"
+        "userId",
+        "onSale",
+        "onSaleSlot"
 })
 public class Fields {
 
@@ -52,6 +54,30 @@ public class Fields {
     private InstanceId instanceId;
     @JsonProperty("userId")
     private UserId userId;
+    @JsonProperty("onSale")
+    private OnSale onSale;
+    @JsonProperty("onSaleSlot")
+    private OnSaleSlot onSaleSlot;
+
+    @JsonProperty("onSale")
+    public OnSale getOnSale() {
+        return onSale;
+    }
+
+    @JsonProperty("oneSale")
+    public void setOnSale(OnSale onSale) {
+        this.onSale = onSale;
+    }
+
+    @JsonProperty("onSaleSlot")
+    public OnSaleSlot getOnSaleSlot() {
+        return onSaleSlot;
+    }
+
+    @JsonProperty("onSaleSlot")
+    public void setOnSaleSlot(OnSaleSlot onSaleSlot) {
+        this.onSaleSlot = onSaleSlot;
+    }
 
     @JsonProperty("userId")
     public UserId getUserId() {

@@ -8,18 +8,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
         "doubleValue"
 })
-public class AdjustedAmount {
+public class OnSaleSlot {
 
     @JsonProperty("doubleValue")
-    private Double doubleValue;
+    private double doubleValue;
 
     @JsonProperty("doubleValue")
-    public Double getDoubleValue() {
+    public double getDoubleValue() {
         return doubleValue;
     }
 
     @JsonProperty("doubleValue")
-    public void setDoubleValue(Double doubleValue) {
+    public void setDoubleValue(double doubleValue) {
         this.doubleValue = doubleValue;
     }
 

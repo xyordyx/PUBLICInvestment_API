@@ -7,36 +7,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.google.gson.Gson;
-import model.GoogleCloud.CIGFireStore;
 import model.finsmartData.FinsmartData;
 import model.finsmartData.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
 import model.json.Opportunities;
-import model.json.Transactions;
-import model.json.firestore.instances.InstanceData;
 import model.json.firestore.investments.Document;
 import model.json.firestore.investments.Investments;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
-
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -66,39 +53,6 @@ public class Util {
         return invoicesIndexes;
     }
 
-    public static HashMap<String, Set<InvoiceTransactions>> indexInvoicesDebtor(List<InvoiceTransactions> invoices){
-        HashMap<String, Set<InvoiceTransactions>> invoicesIndex = new HashMap<>();
-        for(InvoiceTransactions inv : invoices){
-            if(inv.getActualPaymentDate() != null && inv.getPaymentDate() != null){
-                inv.setPastDueDays(getDuePastDays(inv));
-            }
-            if(invoicesIndex.containsKey(inv.getDebtor().get_id())){
-                invoicesIndex.get(inv.getDebtor().get_id()).add(inv);
-            }else {
-                Set<InvoiceTransactions> setOfInvoices = new HashSet<>();
-                setOfInvoices.add(inv);
-                invoicesIndex.put(inv.getDebtor().get_id(), setOfInvoices);
-            }
-        }
-        return invoicesIndex;
-    }
-
-    public static HashMap<String, Set<Transactions>> indexFinancialDebtor(List<Transactions> invoices){
-        HashMap<String, Set<Transactions>> financialIndex = new HashMap<>();
-        for(Transactions inv : invoices){
-            if(inv.getType().equals("investment return") || inv.getType().equals("investment")){
-                if(financialIndex.containsKey(inv.getInvoice().getDebtor().get_id())){
-                    financialIndex.get(inv.getInvoice().getDebtor().get_id()).add(inv);
-                }else {
-                    Set<Transactions> setOfInvoices = new HashSet<>();
-                    setOfInvoices.add(inv);
-                    financialIndex.put(inv.getInvoice().getDebtor().get_id(), setOfInvoices);
-                }
-            }
-        }
-        return financialIndex;
-    }
-
     public static long getDuePastDays(InvoiceTransactions inv){
         long diffInMillis = Math.abs(inv.getActualPaymentDate().getTime() - inv.getPaymentDate().getTime());
         return TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
@@ -108,6 +62,28 @@ public class Util {
         return BigDecimal.valueOf(((tem/30)*amount*days)*0.01)
                 .setScale(3, RoundingMode.HALF_UP)
                 .doubleValue();
+    }
+
+    public static long timesDiff(int saleSlot){
+        String time2 = ((saleSlot == 1) ? "12:30" : "17:30");
+        SimpleDateFormat format1 = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat format2 = new SimpleDateFormat("HH:mm");
+        Date date1 = null;
+        Date date2 = null;
+        try {
+            date1 = format1.parse(getNowTime());
+            date2 = format2.parse(time2);
+            if(date2.before(date1)){
+                Calendar c = Calendar.getInstance();
+                c.setTime(date2);
+                c.add(Calendar.DATE, 1);
+                date2 = c.getTime();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        assert date2 != null;
+        return date2.getTime() - date1.getTime();
     }
 
     public static long timesDiff(String time2){
@@ -146,25 +122,6 @@ public class Util {
         ZoneId zone = ZoneId.of("America/Lima");
         LocalDateTime now = LocalDateTime.now(zone).plus(329, ChronoUnit.MILLIS);
         return dtf.format(now);
-    }
-
-    public static Boolean isValidData(InvestmentData data){
-        if(data != null){
-            return data.getInvoiceId() != null && data.getCurrency() != null && data.getAmount() != null &&
-                    data.getDebtorName() != null;
-        }
-        return false;
-    }
-
-    public static int isCurrentScheduled(ArrayList<InvestmentData> data, String invoiceId){
-        int index = 0;
-        for(InvestmentData temp : data){
-            if(temp.getInvoiceId().equals(invoiceId)){
-                return index;
-            }
-            index++;
-        }
-        return 66;
     }
 
     public static FinsmartData resetData(FinsmartData data){
@@ -251,21 +208,6 @@ public class Util {
         return response;
     }
 
-    public static SecretKeySpec setKey(final String myKey) {
-        MessageDigest sha;
-        byte[] key;
-        try {
-            key = myKey.getBytes(StandardCharsets.UTF_8);
-            sha = MessageDigest.getInstance("SHA-1");
-            key = sha.digest(key);
-            key = Arrays.copyOf(key, 16);
-            return new SecretKeySpec(key, "AES");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static Opportunities[] loadJSONFromFile(){
         try {
             Gson gson = new Gson();
@@ -277,9 +219,5 @@ public class Util {
             ex.printStackTrace();
         }
         return null;
-    }
-
-    public static void postToExecutor(){
-
     }
 }

@@ -4,27 +4,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import model.finsmartData.FinsmartUtil;
 import model.json.*;
 import model.json.firestore.APPData.APPData;
-import model.json.firestore.instances.InstanceData;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import javax.sound.midi.SysexMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import static model.Util.getTime;
 
@@ -46,8 +39,7 @@ public class CIGFinsmart {
     private static final String invoices="/invoices";
     private static final String authenticationPath="/authentications";
     private static final String opportunitiesPath="/opportunities";
-
-    private static final String appEnginePath="hmrestapi-333720.uk.r.appspot.com";
+    private static final String appEnginePath="hmnorth.uk.r.appspot.com";
 
     public Boolean scheduleInvestment(InvestmentData investment) {
         CloseableHttpClient client = HttpClients.createDefault();
@@ -61,6 +53,8 @@ public class CIGFinsmart {
             final String json = "{" +
                     "\"invoiceId\":\""+investment.getInvoiceId()+"\"," +
                     "\"time\":\""+investment.getTime()+"\"," +
+                    "\"onSale\":\""+investment.isOnSale()+"\"," +
+                    "\"onSaleSlot\":\""+investment.getOnSaleSlot()+"\"," +
                     "\"amount\":\""+investment.getAmount()+"\"," +
                     "\"currency\":\""+investment.getCurrency()+"\"," +
                     "\"smartToken\":\""+investment.getSmartToken()+"\"," +

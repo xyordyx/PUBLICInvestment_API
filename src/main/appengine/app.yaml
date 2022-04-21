@@ -1,6 +1,6 @@
 runtime: java11
 instance_class: B4
-service: s1
+service: default
 
 basic_scaling:
   max_instances: 20
