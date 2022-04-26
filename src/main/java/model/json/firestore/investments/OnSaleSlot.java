@@ -6,21 +6,21 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "doubleValue"
+        "integerValue"
 })
 public class OnSaleSlot {
 
-    @JsonProperty("doubleValue")
-    private double doubleValue;
+    @JsonProperty("integerValue")
+    private int integerValue;
 
-    @JsonProperty("doubleValue")
-    public double getDoubleValue() {
-        return doubleValue;
+    @JsonProperty("integerValue")
+    public int getIntegerValue() {
+        return integerValue;
     }
 
-    @JsonProperty("doubleValue")
-    public void setDoubleValue(double doubleValue) {
-        this.doubleValue = doubleValue;
+    @JsonProperty("integerValue")
+    public void setIntegerValue(int integerValue) {
+        this.integerValue = integerValue;
     }
 
 }

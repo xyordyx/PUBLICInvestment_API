@@ -12,6 +12,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class ProviderController {
             lastOpportunities = CIGFinsmart.getOpportunitiesJSON(smartToken);
 
             //FOR TESTING
-               //lastOpportunities = new ArrayList<>(Arrays.asList(Util.loadJSONFromFile()));
+              //lastOpportunities = new ArrayList<>(Arrays.asList(Util.loadJSONFromFile()));
             //FOR TESTING
 
             scheduledDBInvestments =

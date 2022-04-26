@@ -52,7 +52,7 @@ public class InvestmentData {
         this.currentState = document.getFields().getCurrentState().getStringValue();
         this.userId = document.getFields().getUserId().getStringValue();
         this.onSale = document.getFields().getOnSale().getBooleanValue();
-        this.onSaleSlot = (int)document.getFields().getOnSaleSlot().getDoubleValue();
+        this.onSaleSlot = document.getFields().getOnSaleSlot().getIntegerValue();
     }
 
     public int getOnSaleSlot() {
