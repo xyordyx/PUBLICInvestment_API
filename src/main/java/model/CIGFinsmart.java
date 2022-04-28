@@ -45,7 +45,7 @@ public class CIGFinsmart {
         CloseableHttpClient client = HttpClients.createDefault();
         String stringResponse;
         int instance = new Random().nextInt(19);
-        String scheduleURL = investment.getInvoiceId() + "-dot-"+ instance + "-dot-s1-dot-";
+        String scheduleURL = investment.getInvoiceId() + "-dot-"+ instance + "-dot-20220420t181521-dot-";
 
         try {
             HttpPost httpPost = new HttpPost("https://"+scheduleURL+appEnginePath+"/scheduleinvestment");
