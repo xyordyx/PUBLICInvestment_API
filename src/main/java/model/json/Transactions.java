@@ -11,6 +11,7 @@ public class Transactions {
     private String type;
     private Double profit;
     private Double netAmount;
+    private Retention retention;
 
     @Override
     public boolean equals(Object o) {
@@ -23,6 +24,14 @@ public class Transactions {
     @Override
     public int hashCode() {
         return Objects.hash(get_id());
+    }
+
+    public Retention getRetention() {
+        return retention;
+    }
+
+    public void setRetention(Retention retention) {
+        this.retention = retention;
     }
 
     public Double getNetAmount() {

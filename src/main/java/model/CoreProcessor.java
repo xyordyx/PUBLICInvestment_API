@@ -93,12 +93,22 @@ public class CoreProcessor {
                 if (transactions.getCurrency().equals("pen")) {
                     sum = smartData.getTotalPENProfited() + transactions.getAmount();
                     smartData.setTotalPENProfited(sum);
+                    //CODE ADDED TO INCLUDE NEW RETENTION MODEL
+                    if(transactions.getRetention() != null){
+                        smartData.setTotalPENRetentions(smartData.getTotalPENRetentions() +
+                                Double.parseDouble(transactions.getRetention().getAmount()));
+                    }
                     if(transactions.getNetAmount() != null){
                         tempPENSum = tempPENSum + transactions.getNetAmount();
                     }
                 } else {
                     sum = smartData.getTotalUSDProfited() + transactions.getAmount();
                     smartData.setTotalUSDProfited(sum);
+                    //CODE ADDED TO INCLUDE NEW RETENTION MODEL
+                    if(transactions.getRetention() != null){
+                        smartData.setTotalUSDRetentions(smartData.getTotalUSDRetentions() +
+                                Double.parseDouble(transactions.getRetention().getAmount()));
+                    }
                     if(transactions.getNetAmount() != null){
                         tempUSDSum = tempUSDSum + transactions.getNetAmount();
                     }

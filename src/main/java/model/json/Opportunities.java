@@ -3,6 +3,7 @@ package model.json;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import model.json.firestore.investments.Evaluation;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class Opportunities {
@@ -72,7 +73,8 @@ public class Opportunities {
     }
 
     public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
+        this.createdAt = formatter.format(createdAt);
     }
 
     @JsonGetter("evaluation")
