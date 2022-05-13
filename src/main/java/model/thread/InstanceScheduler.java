@@ -64,7 +64,7 @@ public class InstanceScheduler implements Runnable{
                 if(!investmentData.isOnSale()){
                     System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()
                             +" - scheduled - " + getTime());
-                    TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getOnSaleSlot())-750);
+                    TimeUnit.MILLISECONDS.sleep(timesDiff(investmentData.getOnSaleSlot())-950);
                 }
             } catch (InterruptedException e) {
                 System.out.println(Thread.currentThread().getName() + ":"+investmentData.getDebtorName()
