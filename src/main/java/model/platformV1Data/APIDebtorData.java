@@ -1,4 +1,4 @@
-package model.finsmartData;
+package model.platformV1Data;
 
 import model.json.InvoiceTransactions;
 

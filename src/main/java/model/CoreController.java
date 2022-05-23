@@ -45,21 +45,9 @@ public class CoreController {
         CIGFireStore cig = new CIGFireStore();
         String googleToken = GoogleCloudAuthenticator.getGoogleCloudToken();
         if(googleToken != null){
-            //TEST START
-            /*InstanceScheduler inv =  new InstanceScheduler(investment,googleToken);
-            threadPool.submit(inv);
-            investment.setCurrentState("Scheduled");
-            investment.setInstanceId("NEPERIANO");
-            cig.createFireInvestment(googleToken,investment);
-            return ResponseEntity.status(200).body(true);*/
-            //TEST END
-
             //PROD START
-            InstanceScheduler inv =  new InstanceScheduler(investment,googleToken);
-            threadPool.submit(inv);
-            investment.setCurrentState("Scheduled");
-            investment.setInstanceId(System.getenv("GAE_INSTANCE"));
-            cig.createFireInvestment(googleToken,investment);
+            //SCHEDULE INVESTMENTS ON DIFFERENT INSTANCES
+            //LOGIC REMOVED
             return ResponseEntity.status(200).body(true);
             //PROD END
         }
@@ -69,20 +57,8 @@ public class CoreController {
     @GetMapping("/cloudscheduler")
     public ResponseEntity<Boolean> cronScheduler(@RequestHeader Map<String, String> headers){
         CIGFireStore cig = new CIGFireStore();
-        if(headers.get("token").equals("NEPERIANO")){
-            String token = GoogleCloudAuthenticator.getGoogleCloudToken();
-            if(token != null){
-                List<InvestmentData> dbInvestments = Util.getListInvestmentFromList
-                        (cig.getInvestmentsByCompleted(token,false),"DB");
-                for(InvestmentData inv: dbInvestments){
-                    inv.setSmartToken(Objects.requireNonNull(
-                            CIGFinsmart.getAuthentications(cig.getUserDataById(token, inv.getUserId())))
-                            .getAccessToken());
-                    new CIGFinsmart().scheduleInvestment(inv);
-                }
-                return ResponseEntity.ok(true);
-            }
-        }
+        //LOGIC REMOVED
+        //HANDLE EACH REQUEST ON EACH INSTANCE TROUGH THIS CALL
         return ResponseEntity.ok(false);
     }
 

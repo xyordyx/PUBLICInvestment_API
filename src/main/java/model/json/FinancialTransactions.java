@@ -2,14 +2,8 @@ package model.json;
 
 import java.util.ArrayList;
 
+//VARIABLES REMOVED ON THIS FILE
 public class FinancialTransactions {
     private ArrayList<Transactions> financialTransactions;
 
-    public ArrayList<Transactions> getFinancialTransactions() {
-        return financialTransactions;
-    }
-
-    public void setFinancialTransactions(ArrayList<Transactions> financialTransactions) {
-        this.financialTransactions = financialTransactions;
-    }
 }

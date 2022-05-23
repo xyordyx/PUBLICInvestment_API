@@ -18,7 +18,7 @@ import java.io.IOException;
 public class CIGAppEngine {
 
     private static final String appEngineURL =
-            "https://appengine.googleapis.com/v1beta/apps/hmnorth/services/default/versions/20220420t181521/instances";
+            "https://appengine.googleapis.com/v1beta";
 
     public static Instances getCurrentInstances(String token){
         HttpClient httpClient = HttpClientBuilder.create().build();
@@ -31,17 +31,7 @@ public class CIGAppEngine {
         getRequest.addHeader("Authorization", "Bearer "+token);
 
         //Send the request
-        try {
-            HttpResponse response = httpClient.execute(getRequest);
-            if(response.getStatusLine().getStatusCode() == 200) {
-                stringResponse = EntityUtils.toString(response.getEntity());
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                return objectMapper.readValue(stringResponse, Instances.class);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //LOGIC REMOVED
         return null;
     }
 

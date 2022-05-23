@@ -1,4 +1,4 @@
-package model.finsmartData;
+package model.platformV1Data;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import model.json.Opportunities;

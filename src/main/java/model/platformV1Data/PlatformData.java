@@ -1,11 +1,11 @@
-package model.finsmartData;
+package model.platformV1Data;
 
 import model.json.FinancialTransactions;
 import model.json.Transactions;
 
 import java.util.HashMap;
 
-public class FinsmartData {
+public class PlatformData {
 
     private double totalPENAvailable;
     private double totalUSDAvailable;
@@ -42,7 +42,7 @@ public class FinsmartData {
 
     private HashMap<String,Transactions> transactionsHashMap;
 
-    public FinsmartData() {
+    public PlatformData() {
         this.transactionsHashMap = new HashMap<>();
     }
 

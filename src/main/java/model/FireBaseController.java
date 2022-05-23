@@ -23,15 +23,9 @@ public class FireBaseController {
         CIGFireStore cig = new CIGFireStore();
         investment.setCompleted(false);
         String googleToken;
-        if (Util.isAutoManaged(investment.getTime()) || !investment.isOnSale()) {
-            investment.setCurrentState("DB");
-            googleToken = GoogleCloudAuthenticator.getGoogleCloudToken();
-            if(googleToken != null) return new ResponseEntity<>(cig.createFireInvestment(googleToken, investment), HttpStatus.OK);
-        } else {
+        //LOGIC REMOVED
             //POST INVESTMENT TO THE INSTANCE URL
-            return new ResponseEntity<>(new CIGFinsmart().scheduleInvestment(investment), HttpStatus.OK);
-        }
-        return new ResponseEntity<>("", HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new CIGPlatformV1().scheduleInvestment(investment), HttpStatus.OK);
     }
 
     @GetMapping(value = "/getuserdata")
@@ -39,11 +33,7 @@ public class FireBaseController {
         String userEmail = headers.get("useremail");
         CIGFireStore cig = new CIGFireStore();
         String token = GoogleCloudAuthenticator.getGoogleCloudToken();
-        if(token != null){
-            if(cig.getUserDataById(token,userEmail) != null){
-                return ResponseEntity.ok(true);
-            }
-        }
+        //LOGIC REMOVED
         return ResponseEntity.ok(false);
     }
 
@@ -52,11 +42,7 @@ public class FireBaseController {
         String fnPassword = headers.get("password");
         String fnEmail = headers.get("email");
 
-        CIGFireStore cig = new CIGFireStore();
-        String token = GoogleCloudAuthenticator.getGoogleCloudToken();
-        if(token != null) {
-            return ResponseEntity.ok(cig.createAPPData(token, fnPassword,fnEmail));
-        }
+        //LOGIC REMOVED
         return ResponseEntity.badRequest().body(false);
     }
 
@@ -70,25 +56,15 @@ public class FireBaseController {
             model.json.firestore.investments.Document data = cig.getInvestmentsById(token,id);
             if(data != null){
                 if(!isCompleted){
-                    if(data.getFields().getCurrentState().getStringValue().equals("DB")){
-                        if(cig.deleteFireInvestment(token,id)){
-                            return new ResponseEntity<>((Util.getListInvestmentFromList
-                                    (cig.getInvestmentsByCompleted(token,false))), HttpStatus.OK);
-                        }
-                    }
+                    //LOGIC REMOVED
                     //DELETE METHOD WHEN INVESTMENT IS ALREADY IN A INSTANCE
-                    else if(data.getFields().getCurrentState().getStringValue().equals("Scheduled")){
-                        if(CIGAppEngine.deleteAppEngineInstance(token,data.getFields().getInstanceId().getStringValue())
-                                && cig.deleteFireInvestment(token,id)){
-                            return new ResponseEntity<>((Util.getListInvestmentFromList
-                                    (cig.getInvestmentsByCompleted(token,false))), HttpStatus.OK);
-                        }
+                    if(data.getFields().getCurrentState().getStringValue().equals("Scheduled")){
+                        //LOGIC REMOVED
                     }
                     //REMOVE FROM INVESTED RECENTLY
                 }else{
                     if(cig.deleteFireInvestment(token,id)) {
-                        return new ResponseEntity<>((Util.getListInvestmentFromList
-                                (cig.getInvestmentsByCompleted(token, true))), HttpStatus.OK);
+                    //LOGIC REMOVED
                     }
                 }
             }

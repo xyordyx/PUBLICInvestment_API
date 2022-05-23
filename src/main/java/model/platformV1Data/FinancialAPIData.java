@@ -1,4 +1,4 @@
-package model.finsmartData;
+package model.platformV1Data;
 
 public class FinancialAPIData {
     private double totalPENAvailable;
@@ -27,7 +27,7 @@ public class FinancialAPIData {
 
     private int scheduledInvestmentsNum;
 
-    public FinancialAPIData(FinsmartData data) {
+    public FinancialAPIData(PlatformData data) {
         this.totalPENCurrentInvested = data.getTotalPENCurrentInvested();
         this.totalUSDCurrentInvested = data.getTotalUSDCurrentInvested();
         this.totalPENDeposited = data.getTotalPENDeposited();

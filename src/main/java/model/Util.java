@@ -1,29 +1,19 @@
 package model;
 
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.google.gson.Gson;
-import model.finsmartData.FinsmartData;
-import model.finsmartData.InvoiceIndexes;
+import model.platformV1Data.PlatformData;
+import model.platformV1Data.InvoiceIndexes;
 import model.json.InvestmentData;
 import model.json.InvoiceTransactions;
-import model.json.Opportunities;
-import model.json.firestore.investments.Document;
 import model.json.firestore.investments.Investments;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
 import java.io.IOException;
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -37,19 +27,7 @@ public class Util {
 
     public static InvoiceIndexes indexInvoices(List<InvoiceTransactions> invoices){
         InvoiceIndexes invoicesIndexes = new InvoiceIndexes();
-        for(InvoiceTransactions inv : invoices){
-            if(inv.getActualPaymentDate() != null && inv.getPaymentDate() != null){
-                inv.setPastDueDays(getDuePastDays(inv));
-            }
-            invoicesIndexes.getInvoicesIndex().put(inv.get_id(),inv);
-
-            ArrayList<InvoiceTransactions> invoiceArray = new ArrayList<>();
-            if (invoicesIndexes.getDebtorInvoiceIndex().containsKey(inv.getDebtor().get_id())) {
-                invoiceArray = invoicesIndexes.getDebtorInvoiceIndex().get(inv.getDebtor().get_id());
-            }
-            invoiceArray.add(inv);
-            invoicesIndexes.getDebtorInvoiceIndex().put(inv.getDebtor().get_id(),invoiceArray);
-        }
+        //LOGIC REMOVED
         return invoicesIndexes;
     }
 
@@ -124,29 +102,14 @@ public class Util {
         return dtf.format(now);
     }
 
-    public static FinsmartData resetData(FinsmartData data){
-        data.setTotalPENDeposited(0);
-        data.setTotalUSDDeposited(0);
-        data.setTotalPENRetentions(0);
-        data.setTotalUSDRetentions(0);
-        data.setTotalUSDProfited(0);
-        data.setTotalPENProfited(0);
-        data.setTotalUSDCurrentInvested(0);
-        data.setTotalPENCurrentInvested(0);
-        data.setTotalPENAvailable(0);
-        data.setTotalUSDAvailable(0);
+    public static PlatformData resetData(PlatformData data){
+        //LOGIC REMOVED
         return data;
     }
 
     public static ObjectMapper initiatePrettyObjectMapper() {
         ObjectMapper customObjectMapper = new ObjectMapper();
-        customObjectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        customObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        // additional indentation for arrays
-        DefaultPrettyPrinter pp = new DefaultPrettyPrinter();
-        pp.indentArraysWith(new DefaultIndenter());
-        customObjectMapper.setDefaultPrettyPrinter(pp);
-
+        //LOGIC REMOVED
         return customObjectMapper;
     }
 
@@ -158,66 +121,38 @@ public class Util {
                     InvoiceTransactions[] op = objectMapper.readerWithView(deserializationView).forType(InvoiceTransactions[].class).
                             readValue(EntityUtils.toString(inputMessage.getEntity()));
                     return new ArrayList<>(Arrays.asList(op));
-                    //return objectMapper.readerWithView(deserializationView).forType(InvoiceTransactions[].class).readValue(EntityUtils.toString(inputMessage.getEntity()));
                 }
             }
             InvoiceTransactions[] op = objectMapper.readValue(EntityUtils.toString(inputMessage.getEntity()), InvoiceTransactions[].class);
             return new ArrayList<>(Arrays.asList(op));
-            //return objectMapper.readValue(EntityUtils.toString(inputMessage.getEntity()), InvoiceTransactions[].class);
         }
         catch (InvalidDefinitionException ex) {
             throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);
-            //return "Type definition error";
         }
     }
 
     static Boolean isAutoManaged(String time){
         //Asking for 1.5 minutes before execution time
-        return 90000 <= timesDiff(time);
+        //LOGIC REMOVED
+        return true;
     }
 
     public static List<InvestmentData> getListInvestmentData(Investments investments){
         List<InvestmentData> response = new ArrayList<>();
-        if(investments.getDocuments() != null) {
-            for (Document inv : investments.getDocuments()) {
-                response.add(new InvestmentData(inv));
-            }
-        }
+        //LOGIC REMOVED
         return response;
     }
 
     public static List<InvestmentData> getListInvestmentFromList(Investments [] investments){
         List<InvestmentData> response = new ArrayList<>();
-        for(Investments inv: investments){
-            if(inv.getDocument() != null){
-                response.add(new InvestmentData(inv.getDocument()));
-            }
-        }
+        //LOGIC REMOVED
         return response;
     }
 
     public static List<InvestmentData> getListInvestmentFromList(Investments [] investments, String currentState){
         List<InvestmentData> response = new ArrayList<>();
-        for(Investments inv: investments){
-            if(inv.getDocument() != null){
-                if(inv.getDocument().getFields().getCurrentState().getStringValue().equals(currentState)){
-                    response.add(new InvestmentData(inv.getDocument()));
-                }
-            }
-        }
+        //LOGIC REMOVED
         return response;
     }
 
-    public static Opportunities[] loadJSONFromFile(){
-        try {
-            Gson gson = new Gson();
-            Reader reader = Files.newBufferedReader(Paths.get("src/main/resources/static/opps.json"));
-            Opportunities[] opportunities = gson.fromJson(reader, Opportunities[].class);
-            reader.close();
-            return opportunities;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
 }
