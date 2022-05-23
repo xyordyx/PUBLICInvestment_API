@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public class CIGFireStore {
     private static final String authURL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
-    private static final String firebaseKey = "8";
+    private static final String firebaseKey = "";
     private static final String fireDatabasesURL =
             "https://firestore.googleapis.com/";
     private static final String fireIntancesURL =
