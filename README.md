@@ -13,3 +13,7 @@
 - Middleware between API and investments platforms
 - Auto-scalable by amount of investments
 - Data Processing of Investments platforms data
+
+**DESIGN**
+
+<img alt="alt text" src="InvesmentiOS/Assets.xcassets/arch.png" width="1000"/>
