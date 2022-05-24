@@ -14,6 +14,10 @@
 - Auto-scalable by amount of investments
 - Data Processing of Investments platforms data
 
-**DESIGN**
+**INVESTMENT DESIGN**
 
 <img alt="alt text" src="src/main/resources/arch.png" width="1000"/>
+
+**LOGIN DESIGN**
+
+<img alt="alt text" src="src/main/resources/logDesi.png" width="1000"/>
