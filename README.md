@@ -16,4 +16,4 @@
 
 **DESIGN**
 
-<img alt="alt text" src="InvesmentiOS/Assets.xcassets/arch.png" width="1000"/>
+<img alt="alt text" src="src/main/resources/arch.png" width="1000"/>
